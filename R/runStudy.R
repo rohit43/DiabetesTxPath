@@ -45,7 +45,7 @@
 #'
 #' @export
 runStudy <- function(connectionDetails,cdm_database_schema,results_database_schema,target_database_schema,target_cohort_table,numThread,idOne, idTwo, idThree, idFour, idFive, idSix){
-  drugs <- read.csv(system.file(paste("csv/","drugComb.csv",sep=""), package = "TreatmentPath"), stringsAsFactors = FALSE, header = FALSE)
+  drugs <- read.csv(system.file(paste("csv/","drugComb.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
   colnames(drugs) <- c("drugName")
   for(i in 1:nrow(drugs)){
     sqlFileName <- paste(as.character(drugs$drugName[i]),sep="")
@@ -69,7 +69,7 @@ runStudy <- function(connectionDetails,cdm_database_schema,results_database_sche
       outCome <- c(3,4,5,6)
       outComeName <- c("hbA1c","MI","KD","eyes")
       for(j in 1:length(outCome)){
-        cid2Rm <- read.csv(system.file(paste("csv/","conceptIdToRemove.csv",sep=""), package = "TreatmentPath"), stringsAsFactors = FALSE, header = FALSE)
+        cid2Rm <- read.csv(system.file(paste("csv/","conceptIdToRemove.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
         cid2Rm <- as.numeric(as.character(unique(cid2Rm$V1)))
         drugEfficacyAnalysis(drugCombName,numThread,outCome[j],cid2Rm,outComeName[j])
       }
