@@ -1,0 +1,11 @@
+Package: DiabetesTxPath
+Type: Package
+Title: Learning Effective Clinical Treatment Pathways for Type-2 Diabetes
+Version: 0.1.0
+Author: Rohit Vashisht
+Maintainer: The package maintainer <rohitv@stanford.edu>
+Description: This package can be used to learn effective clinical treatment pathways for Type-2 diabetes.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
