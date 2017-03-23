@@ -75,4 +75,25 @@ runStudy <- function(connectionDetails,cdm_database_schema,results_database_sche
       }
     }
   }
+  remove(drugs)
+  #Getting treatment pathways
+  drugs <- read.csv(system.file(paste("csv/","drugCombTxPath.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
+  colnames(drugs) <- c("drugName")
+  txPath <- data.frame()
+  for(i in 1:nrow(drugs)){
+    sqlFileName <- drugs$drugName[i]
+    drugName <- gsub(".sql","",sqlFileName)
+    getCohortTxPath(connectionDetails, cdmDatabaseSchema, resultsDatabaseSchema, sqlFileName, targetDatabaseSchema, targetCohortTable, idOne)
+    sql <- paste("SELECT COUNT(SUBJECT_ID) AS PID FROM @results_database_schema.studyCohort WHERE COHORT_DEFINITION_ID = 1",sep="")
+    sql <- renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
+    sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+    connection <- connect(connectionDetails)
+    numPid <- as.numeric(as.character(querySql(connection, sql)))
+    dat <- as.data.frame(cbind(drugName,numPid))
+    colnames(dat) <- c("drug","numPid")
+    txPath <- rbind(txPath,dat)
+    remove(dat)
+  }
+  write.csv(txPath,paste(results_path,"TxPathways.csv",sep=""))
+  remove(txPath)
 }
