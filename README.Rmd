@@ -31,7 +31,7 @@ targetDatabaseSchema <- "nameOfResultsSchema"
 targetCohortTable <- "studyCohort" #do not change this.
 results_path <- "path to results folder" #where you want the results to be saved.
 cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5
-numThread <- c(numericValue) #eg. 8 for 8 threds. Give as much as you can :) 
+numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
 ```
 It is required that we provide the Ids to treatment, comparator and outcome cohort before hand. This study will construct the T, C, O according to these number. Please do not change them as they are given below.
 
