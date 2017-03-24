@@ -9,6 +9,13 @@ Introduction
 ============
 This is an R package for executing the entire study of Type-2 Diabetes Treatment Pathways end to end. Following are the instruction to excute entire study. 
 
+The package can be installed as follows.
+```r
+library("devtools")
+install_github("rohit43/DiabetesTxPath")
+```
+Begin by loading the required libraries as follows.
+
 ```r
 library("OhdsiRTools")
 library("SqlRender")
