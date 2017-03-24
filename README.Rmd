@@ -7,6 +7,19 @@ output: html_document
 
 
 ## Type-2 Diabetes Treatment Pathways
+Following are the instruction to run the complete study. 
 
+a) Load the libraries
+
+library("OhdsiRTools")
+library("SqlRender")
+library("DatabaseConnector")
+library("CohortMethod")
+library("gridExtra")
+library("DiabetesTxPath")
+
+b) Set up the connection details.
+jdbcDrivers <- new.env()
+connectionDetails <- createConnectionDetails(dbms = "postgresql", server = "userServer",user = "yourUser", password = "yourPassword",port = "yourPort")
 
 
