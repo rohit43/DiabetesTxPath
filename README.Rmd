@@ -45,7 +45,7 @@ You are all set. The entire study can now be ececuted with single command by exe
 
 ```r
 set.seed(24)
-runStudy(connectionDetails,cdm_database_schema,results_database_schema,target_database_schema,target_cohort_table,numThread)
+runStudy()
 ```
 
 Time of execution can vary from few hours to day or two, depending on the size of the dataset you have. 
