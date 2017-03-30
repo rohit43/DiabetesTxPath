@@ -44,7 +44,14 @@
 #' @param idSix Outcome cohort ID
 #'
 #' @export
-runStudy <- function(connectionDetails,cdm_database_schema,results_database_schema,target_database_schema,target_cohort_table,numThread,idOne, idTwo, idThree, idFour, idFive, idSix){
+runStudy <- function(connectionDetails,cdm_database_schema,results_database_schema,target_database_schema,target_cohort_table,numThread){
+  #Assigning the Cohort Ids
+  idOne <- c(1)
+  idTwo <- c(2)
+  idThree <- c(3)
+  idFour <- c(4)
+  idFive <- c(5)
+  idSix <- c(6)
   drugs <- read.csv(system.file(paste("csv/","drugComb.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
   colnames(drugs) <- c("drugName")
   for(i in 1:nrow(drugs)){
