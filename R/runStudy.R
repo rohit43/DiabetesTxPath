@@ -44,7 +44,7 @@
 #' @param idSix Outcome cohort ID
 #'
 #' @export
-runStudy <- function(connectionDetails,cdm_database_schema,results_database_schema,target_database_schema,target_cohort_table,numThread){
+runStudy <- function(){
   #Assigning the Cohort Ids
   idOne <- c(1)
   idTwo <- c(2)
