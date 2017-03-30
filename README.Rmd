@@ -40,21 +40,12 @@ results_path <- "path to results folder" #where you want the results to be saved
 cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5
 numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
 ```
-It is required that we provide the Ids to treatment, comparator and outcome cohort before hand. This study will construct the T, C, O according to these number. Please do not change them as they are given below.
 
-```r
-idOne <- c(1) #Treatment
-idTwo <- c(2) #Comparator
-idThree <- c(3) #Outcome One (HbA1c)
-idFour <- c(4) #Outcome Two (Heart related disorders)
-idFive <- c(5) #Outcome Three (Kidney related disorders)
-idSix <- c(6) #Outcome Four (Eyes related disorder)
-```
 You are all set. The entire study can now be ececuted with single command by executing runStudy function as shown below.
 
 ```r
 set.seed(24)
-runStudy(connectionDetails,cdm_database_schema,results_database_schema,target_database_schema,target_cohort_table,numThread,idOne, idTwo, idThree, idFour, idFive, idSix)
+runStudy(connectionDetails,cdm_database_schema,results_database_schema,target_database_schema,target_cohort_table,numThread)
 ```
 
 Time of execution can vary from few hours to day or two, depending on the size of the dataset you have. 
