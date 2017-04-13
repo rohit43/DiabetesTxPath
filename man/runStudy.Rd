@@ -4,9 +4,8 @@
 \alias{runStudy}
 \title{runStudy}
 \usage{
-runStudy(connectionDetails, cdm_database_schema, results_database_schema,
-  target_database_schema, target_cohort_table, numThread, idOne, idTwo, idThree,
-  idFour, idFive, idSix)
+runStudy(connectionDetails, cdmDatabaseSchema, resultsDatabaseSchema,
+  cdmVersion, outComeId, outComeName)
 }
 \arguments{
 \item{connectionDetails}{The connection details of the database.}

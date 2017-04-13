@@ -4,29 +4,28 @@
 \alias{drugEfficacyAnalysis}
 \title{drugEfficacyAnalysis}
 \usage{
-drugEfficacyAnalysis(drugCombName, numThread, outCome, cid2Rm, outComeName)
+drugEfficacyAnalysis(connectionDetails, cdmDatabaseSchema,
+  resultsDatabaseSchema, cid2Rm, outCome, cdmVersion, treatment, comparator)
 }
 \arguments{
-\item{drugCombName}{Name of the drug combination for which the analysis need to be
-performed.}
-
-\item{numThread}{Number of threads to be used for parallel processing. Give it as much
-as you can :)}
+\item{cid2Rm}{List of concept IDs to be removed before patient-level matching.}
 
 \item{outCome}{The outcome Id for which the analysis need to be performed.}
 
-\item{cid2Rm}{List of concept IDs to be removed before patient-level matching.}
+\item{drugCombName}{Name of the drug combination for which the analysis need to be performed.}
+
+\item{numThread}{Number of threads to be used for parallel processing. Give it as much as you
+can :)}
 
 \item{outComeName}{Name of the outcome measure. This will be used for naming the files.}
 }
 \details{
-This function can be used to perform the drug efficacy analysis.
-Very briefly, this function a) obtain treatment and comparator cohorts from
-target schema b) perform patient-level propensity score matching c) perform
-cox-proportional hazard modeling of the given outcome. Please note this function
-can only performe analysis if there are >= 100 patients in both treatment and
-comparator cohorts. Right now I've hard coded these values. May be in the
-future we'll see how to generalize this.
+This function can be used to perform the drug efficacy analysis. Very briefly, this function a)
+obtain treatment and comparator cohorts from target schema b) perform patient-level propensity
+score matching c) perform cox-proportional hazard modeling of the given outcome. Please note this
+function can only performe analysis if there are >= 100 patients in both treatment and comparator
+cohorts. Right now I've hard coded these values. May be in the future we'll see how to generalize
+this.
 }
 \author{
 Rohit Vashisht

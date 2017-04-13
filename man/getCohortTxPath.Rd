@@ -20,14 +20,14 @@ getCohortTxPath(connectionDetails, cdmDatabaseSchema, resultsDatabaseSchema,
 
 \item{targetCohortTable}{Name of target cohort table.}
 
-\item{idOne}{Numeric value = 1 represents one of the drug combination.
-This is representative of Treatment Cohort.}
+\item{idOne}{Numeric value = 1 represents one of the drug combination. This is
+representative of Treatment Cohort.}
 }
 \details{
-The function get cohort can be used to generate the required cohort for
-a given drug combination. You can use this function to generate your own cohort
-based on given SQL query or use one of the SQL query provided. For DiabetesTxPathway
-it is highly recomended to use the SQLs provided in this package.
+The function get cohort can be used to generate the required cohort for a given drug combination.
+You can use this function to generate your own cohort based on given SQL query or use one of the
+SQL query provided. For DiabetesTxPathway it is highly recomended to use the SQLs provided in this
+package.
 }
 \author{
 Rohit Vashisht
