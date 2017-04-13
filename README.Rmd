@@ -42,7 +42,6 @@ Provide database schema name and other details as follows.
 cdmDatabaseSchema <- "nameOfYourCdmSchema"
 resultsDatabaseSchema <- "nameOfResultsSchema"
 targetDatabaseSchema <- "nameOfResultsSchema"
-targetCohortTable <- "studyCohort" #do not change this.
 results_path <- "path to results folder" #where you want the results to be saved.
 cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5
 numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
@@ -58,6 +57,16 @@ runStudy(connectionDetails = connectionDetails,
          cdmVersion = cdmVersion, 
          outComeId = 3, 
          outComeName = "HbA1c")
+```
+
+Step-6
+The results can be packaged once the study is complete as follows:
+
+```r
+packageResults(connectionDetails = connectionDetails, 
+               cdmDatabaseSchema = cdmDatabaseSchema, 
+               workFolder = results_path, 
+               dbName = cdmDatabaseSchema)
 ```
 
 Time of execution can vary from few hours to day or two, depending on the size of the dataset you have. 
