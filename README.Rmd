@@ -7,9 +7,10 @@ output: html_document
 
 Introduction
 ============
+# Learning Effective Clinical Treatment Pathways for Type-2 Diabetes from Observational Data.
 This is an R package that can be used to execute T2D study. Detail instructions on how to execute this study are provided below. 
 
-Step-1
+## Step-1
 Install the package as follows:
 ```r
 library("devtools")
