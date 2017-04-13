@@ -30,7 +30,11 @@ library("DiabetesTxPath")
 Setup your JBC driver environment and connection details as follows:
 ```r
 jdbcDrivers <- new.env()
-connectionDetails <- createConnectionDetails(dbms = "yourDatabase", server = "yourServer",user = "yourUserName", password = "yourPassword",port = "yourPort")
+connectionDetails <- createConnectionDetails(dbms = "yourDatabase", 
+                                             server = "yourServer",
+                                             user = "yourUserName", 
+                                             password = "yourPassword",
+                                             port = "yourPort")
 ```
 
 ## Step-4
