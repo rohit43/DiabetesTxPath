@@ -5,18 +5,16 @@ date: "3/23/2017"
 output: html_document
 ---
 # Learning Effective Clinical Treatment Pathways for Type-2 Diabetes from Observational Data.
-This is an R package that can be used to execute T2D study. An in-depth discussion on the study design can be found at (link to protocol). Very briefly, the R-Package enables one to decipher effective treatment pathways of T2D for 
-### Controlling HbA1c
-### Myocardial Infraction
+This is an R package that can be used to execute T2D study. An in-depth discussion on the study design can be found at (link to protocol). Very briefly, the R-Package enables one to decipher effective treatment pathways of T2D in terms of controlling a) HbA1c b) less adverse events in terms of Myocardial Infraction c) less adverse events in terms of Kidney related disorders and d) less adverse events related to Eyes disorder. A step-by-step guide to execute this study is provided below: 
 
 ## Step-1
-Install the package as follows:
+The package can be installed as follows:
 ```r
 library("devtools")
 install_github("rohit43/DiabetesTxPath")
 ```
 
-Step-2
+## Step-2
 Load the required libraries as follows:
 
 ```r
@@ -28,14 +26,14 @@ library("CohortMethod")
 library("gridExtra")
 library("DiabetesTxPath")
 ```
-Step-3
+## Step-3
 Setup your JBC driver environment and connection details as follows:
 ```r
 jdbcDrivers <- new.env()
 connectionDetails <- createConnectionDetails(dbms = "yourDatabase", server = "yourServer",user = "yourUserName", password = "yourPassword",port = "yourPort")
 ```
 
-Step-4
+## Step-4
 Provide database schema name and other details as follows.
 
 ```r
@@ -47,9 +45,10 @@ cdmVersion <- "5" #do not change this. Please note, this study can only be execu
 numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
 ```
 
-Step-5
-This study can be executed for four different outcomes a) HbA1c b)Myocardial Infraction c)Kideny Disorders and d)Eyes related Disorders. The instructions therefore can be provided accordingly. For example, the runStudy() function can be used as follows to execute the study for HbA1c as outcome.
+## Step-5
+This study can be executed for four different outcomes a) HbA1c b)Myocardial Infraction c)Kideny Disorders and d)Eyes related Disorders. The instructions therefore can be provided accordingly. For example, do the following in order to run the study for HbA1c as outcome. Please note each of the following commands are for respective out come only and should be executed seprately.
 
+For HbA1c: outComeId = 3 and the outComeName = "HbA1c"
 ```r
 runStudy(connectionDetails = connectionDetails,
          cdmDatabaseSchema = cdmDatabaseSchema, 
@@ -58,16 +57,67 @@ runStudy(connectionDetails = connectionDetails,
          outComeId = 3, 
          outComeName = "HbA1c")
 ```
-
-Step-6
-The results can be packaged once the study is complete as follows:
-
+Package the results as follows:
 ```r
 packageResults(connectionDetails = connectionDetails, 
                cdmDatabaseSchema = cdmDatabaseSchema, 
                workFolder = results_path, 
                dbName = cdmDatabaseSchema)
 ```
+
+For Myocardial Infraction: outComeId = 4 and the outComeName = "MI"
+```r
+runStudy(connectionDetails = connectionDetails,
+         cdmDatabaseSchema = cdmDatabaseSchema, 
+         resultsDatabaseSchema = resultsDatabaseSchema, 
+         cdmVersion = cdmVersion, 
+         outComeId = 4, 
+         outComeName = "MI")
+```
+Package the results as follows:
+```r
+packageResults(connectionDetails = connectionDetails, 
+               cdmDatabaseSchema = cdmDatabaseSchema, 
+               workFolder = results_path, 
+               dbName = cdmDatabaseSchema)
+```
+
+For Kidney Disease: outComeId = 5 and the outComeName = "KD"
+```r
+runStudy(connectionDetails = connectionDetails,
+         cdmDatabaseSchema = cdmDatabaseSchema, 
+         resultsDatabaseSchema = resultsDatabaseSchema, 
+         cdmVersion = cdmVersion, 
+         outComeId = 4, 
+         outComeName = "KD")
+```
+Package the results as follows:
+```r
+packageResults(connectionDetails = connectionDetails, 
+               cdmDatabaseSchema = cdmDatabaseSchema, 
+               workFolder = results_path, 
+               dbName = cdmDatabaseSchema)
+```
+
+For Eyes Related Disorders: outComeId = 6 and the outComeName = "ED"
+```r
+runStudy(connectionDetails = connectionDetails,
+         cdmDatabaseSchema = cdmDatabaseSchema, 
+         resultsDatabaseSchema = resultsDatabaseSchema, 
+         cdmVersion = cdmVersion, 
+         outComeId = 6, 
+         outComeName = "ED")
+```
+Package the results as follows:
+```r
+packageResults(connectionDetails = connectionDetails, 
+               cdmDatabaseSchema = cdmDatabaseSchema, 
+               workFolder = results_path, 
+               dbName = cdmDatabaseSchema)
+```
+
+
+
 
 Time of execution can vary from few hours to day or two, depending on the size of the dataset you have. 
 
