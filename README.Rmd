@@ -4,11 +4,10 @@ author: "Rohit Vashisht"
 date: "3/23/2017"
 output: html_document
 ---
-
-Introduction
-============
 # Learning Effective Clinical Treatment Pathways for Type-2 Diabetes from Observational Data.
-This is an R package that can be used to execute T2D study. Detail instructions on how to execute this study are provided below. 
+This is an R package that can be used to execute T2D study. An in-depth discussion on the study design can be found at (link to protocol). Very briefly, the R-Package enables one to decipher effective treatment pathways of T2D for 
+### Controlling HbA1c
+### Myocardial Infraction
 
 ## Step-1
 Install the package as follows:
