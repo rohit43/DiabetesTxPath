@@ -7,28 +7,35 @@ output: html_document
 
 Introduction
 ============
-This is an R package for executing the entire study of Type-2 Diabetes Treatment Pathways end to end. Following are the instruction to excute entire study. 
+This is an R package that can be used to execute T2D study. Detail instructions on how to execute this study are provided below. 
 
-The package can be installed as follows.
+Step-1
+Install the package as follows:
 ```r
 library("devtools")
 install_github("rohit43/DiabetesTxPath")
 ```
-Begin by loading the required libraries as follows.
+
+Step-2
+Load the required libraries as follows:
 
 ```r
 library("OhdsiRTools")
+library("OhdsiSharing")
 library("SqlRender")
 library("DatabaseConnector")
 library("CohortMethod")
 library("gridExtra")
 library("DiabetesTxPath")
 ```
-Setup the JBC driver environment and connection details.
+Step-3
+Setup your JBC driver environment and connection details as follows:
 ```r
 jdbcDrivers <- new.env()
 connectionDetails <- createConnectionDetails(dbms = "yourDatabase", server = "yourServer",user = "yourUserName", password = "yourPassword",port = "yourPort")
 ```
+
+Step-4
 Provide database schema name and other details as follows.
 
 ```r
@@ -41,11 +48,16 @@ cdmVersion <- "5" #do not change this. Please note, this study can only be execu
 numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
 ```
 
-You are all set. The entire study can now be ececuted with single command by executing runStudy function as shown below.
+Step-5
+This study can be executed for four different outcomes a) HbA1c b)Myocardial Infraction c)Kideny Disorders and d)Eyes related Disorders. The instructions therefore can be provided accordingly. For example, the runStudy() function can be used as follows to execute the study for HbA1c as outcome.
 
 ```r
-set.seed(24)
-runStudy()
+runStudy(connectionDetails = connectionDetails,
+         cdmDatabaseSchema = cdmDatabaseSchema, 
+         resultsDatabaseSchema = resultsDatabaseSchema, 
+         cdmVersion = cdmVersion, 
+         outComeId = 3, 
+         outComeName = "HbA1c")
 ```
 
 Time of execution can vary from few hours to day or two, depending on the size of the dataset you have. 
