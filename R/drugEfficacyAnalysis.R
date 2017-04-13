@@ -1,6 +1,6 @@
 # @file functions
 #
-# Copyright 2015 Observational Health Data Sciences and Informatics
+# Copyright 2017 Observational Health Data Sciences and Informatics
 #
 # This file is part of:
 #  ----------------------------------------------
@@ -21,30 +21,38 @@
 # @author Stanford University Center for Biomedical Informatics - Nigam Shah Lab
 # @author Rohit Vashisht
 #
-#' @title drugEfficacyAnalysis
+#' @title
+#' drugEfficacyAnalysis
 #'
-#' @author Rohit Vashisht
+#' @author
+#' Rohit Vashisht
 #'
-#' @details This function can be used to perform the drug efficacy analysis.
-#' Very briefly, this function a) obtain treatment and comparator cohorts from
-#' target schema b) perform patient-level propensity score matching c) perform
-#' cox-proportional hazard modeling of the given outcome. Please note this function
-#' can only performe analysis if there are >= 100 patients in both treatment and
-#' comparator cohorts. Right now I've hard coded these values. May be in the
-#' future we'll see how to generalize this.
+#' @details
+#' This function can be used to perform the drug efficacy analysis. Very briefly, this function a)
+#' obtain treatment and comparator cohorts from target schema b) perform patient-level propensity
+#' score matching c) perform cox-proportional hazard modeling of the given outcome. Please note this
+#' function can only performe analysis if there are >= 100 patients in both treatment and comparator
+#' cohorts. Right now I've hard coded these values. May be in the future we'll see how to generalize
+#' this.
 #'
-#' @param drugCombName Name of the drug combination for which the analysis need to be
-#' performed.
-#' @param numThread Number of threads to be used for parallel processing. Give it as much
-#' as you can :)
-#' @param outCome The outcome Id for which the analysis need to be performed.
-#' @param cid2Rm List of concept IDs to be removed before patient-level matching.
-#' @param outComeName Name of the outcome measure. This will be used for naming the files.
+#' @param drugCombName   Name of the drug combination for which the analysis need to be performed.
+#' @param numThread      Number of threads to be used for parallel processing. Give it as much as you
+#'                       can :)
+#' @param outCome        The outcome Id for which the analysis need to be performed.
+#' @param cid2Rm         List of concept IDs to be removed before patient-level matching.
+#' @param outComeName    Name of the outcome measure. This will be used for naming the files.
 #'
 #' @export
-drugEfficacyAnalysis <- function(drugCombName,numThread,outCome,cid2Rm,outComeName){
-  exposureTable <- "studyCohort"
-  outcomeTable <- "studyCohort"
+drugEfficacyAnalysis <- function(connectionDetails,
+                                 cdmDatabaseSchema,
+                                 resultsDatabaseSchema,
+                                 cid2Rm,
+                                 outCome,
+                                 cdmVersion,
+                                 treatment,
+                                 comparator) {
+  exposureTable <- "ohdsi_t2dpathway"
+  outcomeTable <- "ohdsi_t2dpathway"
   covariateSettings <- createCovariateSettings(useCovariateDemographics = TRUE,
                                                useCovariateDemographicsAge = TRUE,
                                                useCovariateDemographicsGender = TRUE,
@@ -78,68 +86,77 @@ drugEfficacyAnalysis <- function(drugCombName,numThread,outCome,cid2Rm,outComeNa
                                             covariateSettings = covariateSettings)
   studyPop <- createStudyPopulation(cohortMethodData = cohortMethodData,
                                     outcomeId = outCome,
-                                    firstExposureOnly = FALSE, #it was false
+                                    firstExposureOnly = FALSE,
                                     washoutPeriod = 0,
-                                    removeDuplicateSubjects = FALSE, #it was false
+                                    removeDuplicateSubjects = FALSE,
                                     removeSubjectsWithPriorOutcome = TRUE,
                                     minDaysAtRisk = 0,
                                     riskWindowStart = 0,
                                     addExposureDaysToStart = FALSE,
                                     riskWindowEnd = 0,
                                     addExposureDaysToEnd = TRUE)
+
+  # For some of the treatment and comparator cohort combinations I noticed that there are hardly any
+  # patients. Therefore putting a constaint here on the study requiring it proceed if an only if there
+  # are at-least 100 patients in both treatment and comparator cohort after creating study population.
   tPid <- as.data.frame(table(studyPop$treatment))
-  colnames(tPid) <- c("treatment","pid")
-  if((tPid$pid[1] < 100) || tPid$pid[2] < 100){
-    cat(file = paste(results_path,"NoPropensityScore.txt",sep=""), paste(drugCombName, " has fewer than 100 patients. Can not fit PS, therefore can not compute further.",sep=""), append = TRUE, "\n")
-  }else
-  {
-    p1 <- drawAttritionDiagram(studyPop, treatmentLabel = "Target", comparatorLabel = "Comparator")
+  colnames(tPid) <- c("treatment", "pid")
+  if ((tPid$pid[1] < 150) || tPid$pid[2] < 150) {
+    results <- list()
+  } else {
     psScore <- createPs(cohortMethodData = cohortMethodData,
                         population = studyPop,
                         prior = createPrior("laplace", exclude = c(0), useCrossValidation = TRUE),
                         control = createControl(cvType = "auto",
                                                 startingVariance = 0.01,
                                                 noiseLevel = "quiet",
-                                                tolerance  = 2e-07,
+                                                tolerance = 2e-07,
                                                 cvRepetitions = 10,
                                                 threads = numThread))
-    impFeatures <- getPsModel(psScore,cohortMethodData)
-    write.csv(impFeatures, file = paste(results_path,"ImpFeatures-",drugCombName,"_",outComeName,".csv",sep=""))
-    p2 <- plotPs(psScore, scale = "preference")
-    matchedPop<- matchOnPs(psScore, caliper = 0.25, caliperScale = "standardized", maxRatio = 1)
-    p3 <- plotPs(matchedPop, psScore)
-    p4 <- drawAttritionDiagram(matchedPop)
+    # Getting AUC of propensity score with CI
+    psAUC <- computePsAuc(psScore,
+                          confidenceIntervals = TRUE)  #This is a data frame, see how to integrate it later. Important
+    impFeatures <- getPsModel(psScore, cohortMethodData)
+    psScoreBeforeMatching <- plotPs(psScore,
+                                    scale = "preference",
+                                    treatmentLabel = treatment,
+                                    comparatorLabel = comparator)
+    # Perfome Matching on PS
+    matchedPop <- matchOnPs(psScore, caliper = 0.25, caliperScale = "standardized", maxRatio = 1)
+    psScoreAfterMatching <- plotPs(matchedPop,
+                                   psScore,
+                                   treatmentLabel = treatment,
+                                   comparatorLabel = comparator)
+    finalAttDiag <- drawAttritionDiagram(matchedPop,
+                                         treatmentLabel = treatment,
+                                         comparatorLabel = comparator)
     balance <- computeCovariateBalance(matchedPop, cohortMethodData)
-    p5 <- plotCovariateBalanceScatterPlot(balance)
-    #Cox Proportional hazard model without covariate
-    om <- fitOutcomeModel(population = matchedPop,
-                          cohortMethodData = cohortMethodData,
-                          modelType = "cox",
-                          stratified = TRUE,
-                          useCovariates = FALSE)
-    #modelVal <- rbind(modelVal,as.data.frame(exp(omWithCovariate$outcomeModelTreatmentEstimate)))
-    save(om, file = paste(results_path,"CoxModel-",drugCombName,"_",outComeName,".RData",sep=""))
-    dat <- as.data.frame(exp(om$outcomeModelTreatmentEstimate))
-    dat <- signif(dat,8)
-    rownames(dat) <- c("treatment")
-    p6 <- plotKaplanMeier(studyPop, includeZero = FALSE, confidenceIntervals = FALSE)
-    p7 <- plotKaplanMeier(matchedPop, includeZero = FALSE, confidenceIntervals = FALSE)
-    p8 <- plotKaplanMeier(studyPop, includeZero = FALSE, confidenceIntervals = TRUE)
-    p9 <- plotKaplanMeier(matchedPop, includeZero = FALSE, confidenceIntervals = TRUE)
-    pdf(file=paste(results_path,drugCombName,"_",outComeName,".pdf",sep=""))
-    plot(p1)
-    plot(p2)
-    plot(p3)
-    plot(p4)
-    plot(p5)
-    plot(p6)
-    plot(p7)
-    plot(p8)
-    plot(p9)
-    plot.new()
-    grid.table(dat)
-    dev.off()
-    remove(studyPop,psScore,impFeatures,matchedPop,balance,om,p1,p2,p3,p4,p5,p6,p7,p8,p9,dat)
+    covariateBalance <- plotCovariateBalanceScatterPlot(balance)
+    # Cox Proportional hazard model without covariate
+    modelFit <- fitOutcomeModel(population = matchedPop,
+                                cohortMethodData = cohortMethodData,
+                                modelType = "cox",
+                                stratified = TRUE,
+                                useCovariates = FALSE)
+    kmPlotWithoutCI <- plotKaplanMeier(matchedPop,
+                                       includeZero = FALSE,
+                                       confidenceIntervals = FALSE,
+                                       treatmentLabel = treatment,
+                                       comparatorLabel = comparator)
+    kmPlotWithCI <- plotKaplanMeier(matchedPop,
+                                    includeZero = FALSE,
+                                    confidenceIntervals = TRUE,
+                                    treatmentLabel = treatment,
+                                    comparatorLabel = comparator)
+    results <- list(psAUC,
+                    impFeatures,
+                    psScoreBeforeMatching,
+                    psScoreAfterMatching,
+                    finalAttDiag,
+                    covariateBalance,
+                    modelFit,
+                    kmPlotWithoutCI,
+                    kmPlotWithCI)
   }
-  remove(tPid)
+  return(results)
 }

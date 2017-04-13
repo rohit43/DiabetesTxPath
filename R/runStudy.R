@@ -1,6 +1,6 @@
 # @file functions
 #
-# Copyright 2015 Observational Health Data Sciences and Informatics
+# Copyright 2017 Observational Health Data Sciences and Informatics
 #
 # This file is part of:
 #  ----------------------------------------------
@@ -44,63 +44,67 @@
 #' @param idSix Outcome cohort ID
 #'
 #' @export
-runStudy <- function(){
-  #Assigning the Cohort Ids
-  idOne <- c(1)
-  idTwo <- c(2)
-  idThree <- c(3)
-  idFour <- c(4)
-  idFive <- c(5)
-  idSix <- c(6)
-  drugs <- read.csv(system.file(paste("csv/","drugComb.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
-  colnames(drugs) <- c("drugName")
-  for(i in 1:nrow(drugs)){
-    sqlFileName <- paste(as.character(drugs$drugName[i]),sep="")
-    drugCombName <- gsub(".sql","",sqlFileName)
-    getCohort(connectionDetails, cdmDatabaseSchema, resultsDatabaseSchema, sqlFileName, targetDatabaseSchema, targetCohortTable,idOne,idTwo,idThree,idFour,idFive,idSix)
-    sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.studyCohort WHERE COHORT_DEFINITION_ID = 1",sep="")
-    sql <- renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
-    sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-    connection <- connect(connectionDetails)
-    numPidOne <- as.numeric(as.character(querySql(connection, sql)))
-    remove(sql)
-    sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.studyCohort WHERE COHORT_DEFINITION_ID = 2",sep="")
-    sql <- renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
-    sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-    numPidTwo <- as.numeric(as.character(querySql(connection, sql)))
-    remove(sql)
-    if((numPidOne < 100) || (numPidTwo < 100)){
-      cat(file = paste(results_path,"notPerformedFor.txt",sep=""), paste("Analysis can not be done for - ",i," - ",drugCombName," as one of them has less than 100 patients",sep=""), append = TRUE, "\n")
+runStudy <- function(connectionDetails,cdmDatabaseSchema,resultsDatabaseSchema,cdmVersion,outComeId,outComeName){
+  tcComb <- read.csv(system.file(paste("settings/","treatmentComparator.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = TRUE)
+  conn <- DatabaseConnector::connect(connectionDetails)
+  drugComparision <- data.frame()
+  for(i in 1:nrow(tcComb)){
+    buildCohort(connectionDetails = connectionDetails,
+                cdmDatabaseSchema = cdmDatabaseSchema,
+                resultsDatabaseSchema = resultsDatabaseSchema,
+                treatment = paste(tcComb$treatmentCohort[i],".sql",sep=""),
+                comparator = paste(tcComb$comparatorCohort[i],".sql",sep=""),
+                outComeId = outComeId)
+  #Computing total number of patients in both treatment and comparator cohorts.
+  #The study will not be performed if each treatment and comparator cohorts have lesss than 100 patients.
+    sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",sep="")
+    sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
+    sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+    numPidOne <- as.numeric(as.character((querySql(conn, sql)))) #In some cases the 6th outcome is not being generated.
+    sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 2",sep="")
+    sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
+    sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+    numPidTwo <- as.numeric(as.character((querySql(conn, sql))))
+    if(numPidOne < 150 || numPidTwo < 150){
+      drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
+      colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
     }else
     {
-      outCome <- c(3,4,5,6)
-      outComeName <- c("hbA1c","MI","KD","eyes")
-      for(j in 1:length(outCome)){
-        cid2Rm <- read.csv(system.file(paste("csv/","conceptIdToRemove.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
+        treatment <- tcComb$treatmentCohort[i]
+        comparator <- tcComb$comparatorCohort[i]
+        cid2Rm <- read.csv(system.file(paste("settings/","conceptIdToRemove.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
         cid2Rm <- as.numeric(as.character(unique(cid2Rm$V1)))
-        drugEfficacyAnalysis(drugCombName,numThread,outCome[j],cid2Rm,outComeName[j])
-      }
+        results <- drugEfficacyAnalysis(connectionDetails = connectionDetails,
+                             cdmDatabaseSchema = cdmDatabaseSchema,
+                             resultsDatabaseSchema = resultsDatabaseSchema,
+                             cid2Rm = cid2Rm,
+                             outCome = outComeId,
+                             cdmVersion = cdmVersion,
+                             treatment = treatment,
+                             comparator = comparator)
+
+        if(length(results)>1){
+          drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[7]])),exp(confint(results[[7]]))[1],exp(confint(results[[7]]))[2])
+          colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+          write.csv(results[[2]],file=paste(results_path,"impFeature",treatment,"-and-",comparator,".csv",sep=""))
+          pdf(file=paste(results_path,treatment,"-and-",comparator,".pdf",sep=""))
+          plot(results[[3]]) #Ps score before matching.
+          plot(results[[4]]) #Ps score after matching.
+          plot(results[[6]]) #Cov balance.
+          plot(results[[5]]) #Attr diagram.
+          plot(results[[8]]) #Km without CI
+          plot(results[[9]]) #Km with CI
+          plot.new()
+          grid.table(results[[1]]) #PsAUC
+          dev.off()
+        }else
+        {
+          drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
+          colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+        }
     }
+    drugComparision <- rbind(drugComparision,drugRR_raw)
+    remove(drugRR_raw)
   }
-  remove(drugs)
-  #Getting treatment pathways
-  drugs <- read.csv(system.file(paste("csv/","drugCombTxPath.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
-  colnames(drugs) <- c("drugName")
-  txPath <- data.frame()
-  for(i in 1:nrow(drugs)){
-    sqlFileName <- drugs$drugName[i]
-    drugName <- gsub(".sql","",sqlFileName)
-    getCohortTxPath(connectionDetails, cdmDatabaseSchema, resultsDatabaseSchema, sqlFileName, targetDatabaseSchema, targetCohortTable, idOne)
-    sql <- paste("SELECT COUNT(SUBJECT_ID) AS PID FROM @results_database_schema.studyCohort WHERE COHORT_DEFINITION_ID = 1",sep="")
-    sql <- renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
-    sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-    connection <- connect(connectionDetails)
-    numPid <- as.numeric(as.character(querySql(connection, sql)))
-    dat <- as.data.frame(cbind(drugName,numPid))
-    colnames(dat) <- c("drug","numPid")
-    txPath <- rbind(txPath,dat)
-    remove(dat)
-  }
-  write.csv(txPath,paste(results_path,"TxPathways.csv",sep=""))
-  remove(txPath)
+  write.csv(drugComparision, file = paste(results_path,"drugComparision.csv",sep=""))
 }
