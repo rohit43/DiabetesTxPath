@@ -41,7 +41,8 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
                              cdmDatabaseSchema = cdmDatabaseSchema,
                              resultsDatabaseSchema = resultsDatabaseSchema,
                              cdmVersion = cdmVersion,
-                             numThread = numThread){
+                             numThread = numThread,
+                             results_path = results_path){
   outComeId <- c(3,4,5,6)
   #3 - HbA1c
   #4 - MI

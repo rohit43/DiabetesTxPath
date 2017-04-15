@@ -45,7 +45,8 @@ runStudy <- function(connectionDetails = connectionDetails,
                      cdmVersion = cdmVersion,
                      outComeId = outComeId,
                      outComeName = outComeName,
-                     numThread = numThread){
+                     numThread = numThread,
+                     results_path = results_path){
   tcComb <- read.csv(system.file(paste("settings/","treatmentComparator.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = TRUE)
   conn <- DatabaseConnector::connect(connectionDetails)
   drugComparision <- data.frame()
