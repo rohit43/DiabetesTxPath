@@ -56,7 +56,8 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
              cdmVersion = cdmVersion,
              outComeId = outComeId[i],
              outComeName = outComeName[i],
-             numThread = numThread)
+             numThread = numThread,
+             results_path = results_path)
     print(paste("*************** Study Completed for outcome - ",outComeName[i]," *******************",sep=""))
   }
 }
