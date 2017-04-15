@@ -87,8 +87,8 @@ runStudy <- function(connectionDetails = connectionDetails,
         if(length(results)>1){
           drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[7]])),exp(confint(results[[7]]))[1],exp(confint(results[[7]]))[2])
           colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
-          write.csv(results[[2]],file=paste(results_path,"impFeature",treatment,"-and-",comparator,".csv",sep=""))
-          pdf(file=paste(results_path,treatment,"-and-",comparator,".pdf",sep=""))
+          write.csv(results[[2]],file=paste(results_path,"impFeature",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
+          pdf(file=paste(results_path,treatment,"-and-",comparator,"_",outComeName,".pdf",sep=""))
           plot(results[[3]]) #Ps score before matching.
           plot(results[[4]]) #Ps score after matching.
           plot(results[[6]]) #Cov balance.
@@ -107,5 +107,5 @@ runStudy <- function(connectionDetails = connectionDetails,
     drugComparision <- rbind(drugComparision,drugRR_raw)
     remove(drugRR_raw)
   }
-  write.csv(drugComparision, file = paste(results_path,"drugComparision.csv",sep=""))
+  write.csv(drugComparision, file = paste(results_path,"drugComparision","_",outComeName,".csv",sep=""))
 }
