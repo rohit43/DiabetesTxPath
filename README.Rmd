@@ -57,7 +57,8 @@ runCompleteStudy(connectionDetails = connectionDetails,
                  cdmDatabaseSchema = cdmDatabaseSchema,
                  resultsDatabaseSchema = resultsDatabaseSchema,
                  cdmVersion = cdmVersion,
-                 numThread = numThread)
+                 numThread = numThread,
+                 results_path = results_path)
 ```
 
 Package the results as follows:
@@ -79,7 +80,8 @@ runStudy(connectionDetails = connectionDetails,
          cdmVersion = cdmVersion, 
          outComeId = 3, 
          outComeName = "HbA1c",
-         numThread = numThread)
+         numThread = numThread,
+         results_path = results_path)
 ```
 Package the results as follows:
 ```r
@@ -97,7 +99,8 @@ runStudy(connectionDetails = connectionDetails,
          cdmVersion = cdmVersion, 
          outComeId = 4, 
          outComeName = "MI",
-         numThread = numThread)
+         numThread = numThread,
+         results_path = results_path)
 ```
 Package the results as follows:
 ```r
@@ -115,7 +118,8 @@ runStudy(connectionDetails = connectionDetails,
          cdmVersion = cdmVersion, 
          outComeId = 5, 
          outComeName = "KD",
-         numThread = numThread)
+         numThread = numThread,
+         results_path = results_path)
 ```
 Package the results as follows:
 ```r
@@ -133,7 +137,8 @@ runStudy(connectionDetails = connectionDetails,
          cdmVersion = cdmVersion, 
          outComeId = 6, 
          outComeName = "ED",
-         numThread = numThread)
+         numThread = numThread,
+         results_path = results_path)
 ```
 Package the results as follows:
 ```r
