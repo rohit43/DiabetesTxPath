@@ -50,6 +50,25 @@ numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :)
 ```
 
 ## Step-5
+The complete study can be executed with a single function as shown below. Please note, this function will run the study for all the 4 different outcomes a) HbA1c b)Mycoardial Infraction c)Kidney Disease and d)Eyes related disorders considered in this analysis. Please reffer to ## Step-6 onwards in order to run the study for each of these outcomes seprately. The script to run the complete study is below:
+
+```r
+runCompleteStudy(connectionDetails = connectionDetails,
+                 cdmDatabaseSchema = cdmDatabaseSchema,
+                 resultsDatabaseSchema = resultsDatabaseSchema,
+                 cdmVersion = cdmVersion,
+                 numThread = numThread)
+```
+
+Package the results as follows:
+```r
+packageResults(connectionDetails = connectionDetails, 
+               cdmDatabaseSchema = cdmDatabaseSchema, 
+               workFolder = results_path, 
+               dbName = cdmDatabaseSchema)
+```
+
+## Step-6
 This study can be executed for four different outcomes a) HbA1c b)Myocardial Infraction c)Kideny Disorders and d)Eyes related Disorders. The instructions therefore can be provided accordingly. For example, do the following in order to run the study for HbA1c as outcome. Please note each of the following commands are for respective out come only and should be executed seprately.
 
 For HbA1c: outComeId = 3 and the outComeName = "HbA1c"
