@@ -99,7 +99,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
 
   # For some of the treatment and comparator cohort combinations I noticed that there are hardly any
   # patients. Therefore putting a constaint here on the study requiring it proceed if an only if there
-  # are at-least 100 patients in both treatment and comparator cohort after creating study population.
+  # are at-least 150 patients in both treatment and comparator cohort after creating study population.
   tPid <- as.data.frame(table(studyPop$treatment))
   colnames(tPid) <- c("treatment", "pid")
   if ((tPid$pid[1] < 150) || tPid$pid[2] < 150) {
