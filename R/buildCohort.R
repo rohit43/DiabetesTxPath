@@ -1,6 +1,6 @@
 # Copyright 2017 Observational Health Data Sciences and Informatics
 #
-# This file is part of AlendronateVsRaloxifene
+# This file is part of DiabetesTxPath
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,9 +68,9 @@ buildCohort <- function(connectionDetails,
   # Constructing treatment cohort - Treatment Cohort Id will always be 1
   sql <- readSql(system.file(paste("sql/sql_server/", treatment, sep = ""),
                              package = "DiabetesTxPath"))
+
   sql <- SqlRender::renderSql(sql,
                               cdm_database_schema = cdmDatabaseSchema,
-                              results_database_schema = resultsDatabaseSchema,
                               target_database_schema = targetDatabaseSchema,
                               target_cohort_table = targetCohortTable,
                               target_cohort_id = 1)$sql
@@ -82,7 +82,6 @@ buildCohort <- function(connectionDetails,
                              package = "DiabetesTxPath"))
   sql <- SqlRender::renderSql(sql,
                               cdm_database_schema = cdmDatabaseSchema,
-                              results_database_schema = resultsDatabaseSchema,
                               target_database_schema = targetDatabaseSchema,
                               target_cohort_table = targetCohortTable,
                               target_cohort_id = 2)$sql
@@ -95,7 +94,6 @@ buildCohort <- function(connectionDetails,
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
                                 cdm_database_schema = cdmDatabaseSchema,
-                                results_database_schema = resultsDatabaseSchema,
                                 target_database_schema = targetDatabaseSchema,
                                 target_cohort_table = targetCohortTable,
                                 target_cohort_id = 3)$sql
@@ -108,7 +106,6 @@ buildCohort <- function(connectionDetails,
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
                                 cdm_database_schema = cdmDatabaseSchema,
-                                results_database_schema = resultsDatabaseSchema,
                                 target_database_schema = targetDatabaseSchema,
                                 target_cohort_table = targetCohortTable,
                                 target_cohort_id = 4)$sql
@@ -120,7 +117,6 @@ buildCohort <- function(connectionDetails,
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
                                 cdm_database_schema = cdmDatabaseSchema,
-                                results_database_schema = resultsDatabaseSchema,
                                 target_database_schema = targetDatabaseSchema,
                                 target_cohort_table = targetCohortTable,
                                 target_cohort_id = 5)$sql
@@ -133,7 +129,6 @@ buildCohort <- function(connectionDetails,
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
                                 cdm_database_schema = cdmDatabaseSchema,
-                                results_database_schema = resultsDatabaseSchema,
                                 target_database_schema = targetDatabaseSchema,
                                 target_cohort_table = targetCohortTable,
                                 target_cohort_id = 6)$sql
