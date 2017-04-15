@@ -50,7 +50,8 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                  outCome,
                                  cdmVersion,
                                  treatment,
-                                 comparator) {
+                                 comparator,
+                                 numThread) {
   exposureTable <- "ohdsi_t2dpathway"
   outcomeTable <- "ohdsi_t2dpathway"
   covariateSettings <- createCovariateSettings(useCovariateDemographics = TRUE,

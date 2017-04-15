@@ -31,20 +31,20 @@
 #' of the drug group considered in the study.
 #'
 #' @param connectionDetails The connection details of the database.
-#' @param cdm_database_schema The name of your cdm database schema.
-#' @param results_database_schema The name of your results database schema.
-#' @param target_database_schema The name of the target database schema.
-#' @param target_cohort_table The name of target cohort table.
-#' @param numThread Number of threads to be used.
-#' @param idOne Treatment cohort ID
-#' @param idTwo Comparator Cohort ID
-#' @param idThree Outcome cohort ID
-#' @param idFour Outcome cohort ID
-#' @param idFive Outcome cohort ID
-#' @param idSix Outcome cohort ID
+#' @param cdmDatabaseSchema The name of cdm database schema.
+#' @param resultsDatabaseSchema The name of results database schema.
+#' @param cdmVersion The name of cdm version, should be 5
+#' @param outComeId The outcome Id for which study need to be executed (3 = HbA1c, 4 = MI, 5 = KD and 6 = ED)
+#' @param outComeName Name of the outcome.
 #'
 #' @export
-runStudy <- function(connectionDetails,cdmDatabaseSchema,resultsDatabaseSchema,cdmVersion,outComeId,outComeName){
+runStudy <- function(connectionDetails = connectionDetails,
+                     cdmDatabaseSchema = cdmDatabaseSchema,
+                     resultsDatabaseSchema = resultsDatabaseSchema,
+                     cdmVersion = cdmVersion,
+                     outComeId = outComeId,
+                     outComeName = outComeName,
+                     numThread = numThread){
   tcComb <- read.csv(system.file(paste("settings/","treatmentComparator.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = TRUE)
   conn <- DatabaseConnector::connect(connectionDetails)
   drugComparision <- data.frame()
@@ -81,7 +81,8 @@ runStudy <- function(connectionDetails,cdmDatabaseSchema,resultsDatabaseSchema,c
                              outCome = outComeId,
                              cdmVersion = cdmVersion,
                              treatment = treatment,
-                             comparator = comparator)
+                             comparator = comparator,
+                             numThread = numThread)
 
         if(length(results)>1){
           drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[7]])),exp(confint(results[[7]]))[1],exp(confint(results[[7]]))[2])
