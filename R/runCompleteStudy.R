@@ -34,6 +34,7 @@
 #' @param cdmDatabaseSchema The cdm database schema
 #' @param resultsDatabaseSchema The results datavase schema
 #' @param cdmVersion The cdm version, should be 5 only
+#' @param numThread Number of threads to be used.
 #'
 #' @export
 runCompleteStudy <- function(connectionDetails = connectionDetails,

@@ -26,9 +26,9 @@
 #' @author Rohit Vashisht
 #'
 #' @details This function can be used to perform the DiabetesTxPathway analysis
-#' end-to-end. Just supply the details and leave it running overnight. Please note
-#' the function will perform analysis if there are atleast 100 patients for each
-#' of the drug group considered in the study.
+#' for a given outcome of interest. Briefly, for a given drug combinations, the
+#' function will construct a treatment, a comparator and an outcome cohort. Will
+#' use the CohortMethod and perform the analysis.
 #'
 #' @param connectionDetails The connection details of the database.
 #' @param cdmDatabaseSchema The name of cdm database schema.
@@ -36,6 +36,7 @@
 #' @param cdmVersion The name of cdm version, should be 5
 #' @param outComeId The outcome Id for which study need to be executed (3 = HbA1c, 4 = MI, 5 = KD and 6 = ED)
 #' @param outComeName Name of the outcome.
+#' @param numThread Number of threads.
 #'
 #' @export
 runStudy <- function(connectionDetails = connectionDetails,
@@ -56,11 +57,11 @@ runStudy <- function(connectionDetails = connectionDetails,
                 comparator = paste(tcComb$comparatorCohort[i],".sql",sep=""),
                 outComeId = outComeId)
   #Computing total number of patients in both treatment and comparator cohorts.
-  #The study will not be performed if each treatment and comparator cohorts have lesss than 100 patients.
+  #The study will not be performed if each treatment and comparator cohorts have lesss than 150 patients.
     sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",sep="")
     sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-    numPidOne <- as.numeric(as.character((querySql(conn, sql)))) #In some cases the 6th outcome is not being generated.
+    numPidOne <- as.numeric(as.character((querySql(conn, sql))))
     sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 2",sep="")
     sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql

@@ -35,12 +35,7 @@
 #' @param comparator              The name of the comparator cohort that you want to create, for
 #'                                example comparator = c("SulfToSulf.sql) will create comparator cohort
 #'                                with respect to treatment cohort above.
-#' @param outComeOne              The name of the outcome cohort outComeOne = c("HbA1c.sql) will creat
-#'                                outcome cohort.
-#' @param outComeTwo              The name of the outcome cohort outComeTwo =
-#'                                c("myocardialInfraction.sql) will create outcome cohort of Myocardial
-#'                                Infraction.
-#' @param outComeThree            The name of the outcome cohort outComeThree = c() (/)
+#' @param outComeId               The outcome Id of interest.
 #'
 #' @export
 buildCohort <- function(connectionDetails,

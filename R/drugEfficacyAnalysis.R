@@ -31,16 +31,19 @@
 #' This function can be used to perform the drug efficacy analysis. Very briefly, this function a)
 #' obtain treatment and comparator cohorts from target schema b) perform patient-level propensity
 #' score matching c) perform cox-proportional hazard modeling of the given outcome. Please note this
-#' function can only performe analysis if there are >= 100 patients in both treatment and comparator
+#' function can only performe analysis if there are > 150 patients in both treatment and comparator
 #' cohorts. Right now I've hard coded these values. May be in the future we'll see how to generalize
 #' this.
 #'
-#' @param drugCombName   Name of the drug combination for which the analysis need to be performed.
-#' @param numThread      Number of threads to be used for parallel processing. Give it as much as you
-#'                       can :)
-#' @param outCome        The outcome Id for which the analysis need to be performed.
-#' @param cid2Rm         List of concept IDs to be removed before patient-level matching.
-#' @param outComeName    Name of the outcome measure. This will be used for naming the files.
+#' @param connectionDetails The connection details.
+#' @param cdmDatabaseSchema Name of CDM database schema.
+#' @param resultsDatabaseSchema Name of results database schema.
+#' @param cid2Rm Concept Ids to remove before matching.
+#' @param outCome Outcome Id of interest, for which the analysis need to be performed.
+#' @param cdmVersion Version of cdm, should be 5 only.
+#' @param treatment Name of treatment drug.
+#' @param comparator Name of comparator drug.
+#' @param numThread Number of threads.
 #'
 #' @export
 drugEfficacyAnalysis <- function(connectionDetails,
