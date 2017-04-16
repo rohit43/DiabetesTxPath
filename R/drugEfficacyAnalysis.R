@@ -117,42 +117,53 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                                 tolerance = 2e-07,
                                                 cvRepetitions = 10,
                                                 threads = numThread))
-    # Getting AUC of propensity score with CI
-    psAUC <- computePsAuc(psScore,
+    #In some cases fitting model for calculating PS score is throwing up an error
+    #despite heaving 150 patients. The warning message in brief is, In createPs(cohortMethodData = cohortMethodData, population = studyPop,  :
+    #All coefficients (except maybe the intercept) are zero.
+    #I think, this is due to less number of subjects and hardely any cov. Therefore
+    #we'll not compute further for such drug combinations as we don't have data.
+    #Doing the following fix for such cases
+    allPsScore <- unique(psScore$propensityScore)
+    if(length(allPsScore)==1){
+      results <- list()
+    }else
+    {
+      # Getting AUC of propensity score with CI
+      psAUC <- computePsAuc(psScore,
                           confidenceIntervals = TRUE)  #This is a data frame, see how to integrate it later. Important
-    impFeatures <- getPsModel(psScore, cohortMethodData)
-    psScoreBeforeMatching <- plotPs(psScore,
+      impFeatures <- getPsModel(psScore, cohortMethodData)
+      psScoreBeforeMatching <- plotPs(psScore,
                                     scale = "preference",
                                     treatmentLabel = treatment,
                                     comparatorLabel = comparator)
-    # Perfome Matching on PS
-    matchedPop <- matchOnPs(psScore, caliper = 0.25, caliperScale = "standardized", maxRatio = 1)
-    psScoreAfterMatching <- plotPs(matchedPop,
+      # Perfome Matching on PS
+      matchedPop <- matchOnPs(psScore, caliper = 0.25, caliperScale = "standardized", maxRatio = 1)
+      psScoreAfterMatching <- plotPs(matchedPop,
                                    psScore,
                                    treatmentLabel = treatment,
                                    comparatorLabel = comparator)
-    finalAttDiag <- drawAttritionDiagram(matchedPop,
+      finalAttDiag <- drawAttritionDiagram(matchedPop,
                                          treatmentLabel = treatment,
                                          comparatorLabel = comparator)
-    balance <- computeCovariateBalance(matchedPop, cohortMethodData)
-    covariateBalance <- plotCovariateBalanceScatterPlot(balance)
-    # Cox Proportional hazard model without covariate
-    modelFit <- fitOutcomeModel(population = matchedPop,
+      balance <- computeCovariateBalance(matchedPop, cohortMethodData)
+      covariateBalance <- plotCovariateBalanceScatterPlot(balance)
+      # Cox Proportional hazard model without covariate
+      modelFit <- fitOutcomeModel(population = matchedPop,
                                 cohortMethodData = cohortMethodData,
                                 modelType = "cox",
                                 stratified = TRUE,
                                 useCovariates = FALSE)
-    kmPlotWithoutCI <- plotKaplanMeier(matchedPop,
+      kmPlotWithoutCI <- plotKaplanMeier(matchedPop,
                                        includeZero = FALSE,
                                        confidenceIntervals = FALSE,
                                        treatmentLabel = treatment,
                                        comparatorLabel = comparator)
-    kmPlotWithCI <- plotKaplanMeier(matchedPop,
+      kmPlotWithCI <- plotKaplanMeier(matchedPop,
                                     includeZero = FALSE,
                                     confidenceIntervals = TRUE,
                                     treatmentLabel = treatment,
                                     comparatorLabel = comparator)
-    results <- list(psAUC,
+      results <- list(psAUC,
                     impFeatures,
                     psScoreBeforeMatching,
                     psScoreAfterMatching,
@@ -161,6 +172,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
                     modelFit,
                     kmPlotWithoutCI,
                     kmPlotWithCI)
+    }
   }
   return(results)
 }
