@@ -31,7 +31,7 @@
 #' This function can be used to perform the drug efficacy analysis. Very briefly, this function a)
 #' obtain treatment and comparator cohorts from target schema b) perform patient-level propensity
 #' score matching c) perform cox-proportional hazard modeling of the given outcome. Please note this
-#' function can only performe analysis if there are > 150 patients in both treatment and comparator
+#' function can only performe analysis if there are > 250 patients in both treatment and comparator
 #' cohorts. Right now I've hard coded these values. May be in the future we'll see how to generalize
 #' this.
 #'
@@ -102,10 +102,10 @@ drugEfficacyAnalysis <- function(connectionDetails,
 
   # For some of the treatment and comparator cohort combinations I noticed that there are hardly any
   # patients. Therefore putting a constaint here on the study requiring it proceed if an only if there
-  # are at-least 150 patients in both treatment and comparator cohort after creating study population.
+  # are at-least 250 patients in both treatment and comparator cohort after creating study population.
   tPid <- as.data.frame(table(studyPop$treatment))
   colnames(tPid) <- c("treatment", "pid")
-  if ((tPid$pid[1] < 150) || tPid$pid[2] < 150) {
+  if ((tPid$pid[1] < 250) || tPid$pid[2] < 250) {
     results <- list()
   } else {
     psScore <- createPs(cohortMethodData = cohortMethodData,
@@ -118,7 +118,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                                 cvRepetitions = 10,
                                                 threads = numThread))
     #In some cases fitting model for calculating PS score is throwing up an error
-    #despite heaving 150 patients. The warning message in brief is, In createPs(cohortMethodData = cohortMethodData, population = studyPop,  :
+    #despite heaving 250 patients. The warning message in brief is, In createPs(cohortMethodData = cohortMethodData, population = studyPop,  :
     #All coefficients (except maybe the intercept) are zero.
     #I think, this is due to less number of subjects and hardely any cov. Therefore
     #we'll not compute further for such drug combinations as we don't have data.
