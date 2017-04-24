@@ -5,25 +5,33 @@
 \title{drugEfficacyAnalysis}
 \usage{
 drugEfficacyAnalysis(connectionDetails, cdmDatabaseSchema,
-  resultsDatabaseSchema, cid2Rm, outCome, cdmVersion, treatment, comparator)
+  resultsDatabaseSchema, cid2Rm, outCome, cdmVersion, treatment, comparator,
+  numThread)
 }
 \arguments{
-\item{cid2Rm}{List of concept IDs to be removed before patient-level matching.}
+\item{connectionDetails}{The connection details.}
 
-\item{outCome}{The outcome Id for which the analysis need to be performed.}
+\item{cdmDatabaseSchema}{Name of CDM database schema.}
 
-\item{drugCombName}{Name of the drug combination for which the analysis need to be performed.}
+\item{resultsDatabaseSchema}{Name of results database schema.}
 
-\item{numThread}{Number of threads to be used for parallel processing. Give it as much as you
-can :)}
+\item{cid2Rm}{Concept Ids to remove before matching.}
 
-\item{outComeName}{Name of the outcome measure. This will be used for naming the files.}
+\item{outCome}{Outcome Id of interest, for which the analysis need to be performed.}
+
+\item{cdmVersion}{Version of cdm, should be 5 only.}
+
+\item{treatment}{Name of treatment drug.}
+
+\item{comparator}{Name of comparator drug.}
+
+\item{numThread}{Number of threads.}
 }
 \details{
 This function can be used to perform the drug efficacy analysis. Very briefly, this function a)
 obtain treatment and comparator cohorts from target schema b) perform patient-level propensity
 score matching c) perform cox-proportional hazard modeling of the given outcome. Please note this
-function can only performe analysis if there are >= 100 patients in both treatment and comparator
+function can only performe analysis if there are > 150 patients in both treatment and comparator
 cohorts. Right now I've hard coded these values. May be in the future we'll see how to generalize
 this.
 }

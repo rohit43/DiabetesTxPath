@@ -29,14 +29,7 @@ patients who start with Biguanide and remain on it.}
 example comparator = c("SulfToSulf.sql) will create comparator cohort
 with respect to treatment cohort above.}
 
-\item{outComeOne}{The name of the outcome cohort outComeOne = c("HbA1c.sql) will creat
-outcome cohort.}
-
-\item{outComeTwo}{The name of the outcome cohort outComeTwo =
-c("myocardialInfraction.sql) will create outcome cohort of Myocardial
-Infraction.}
-
-\item{outComeThree}{The name of the outcome cohort outComeThree = c() (/)}
+\item{outComeId}{The outcome Id of interest.}
 }
 \description{
 Create the exposure and outcome cohorts

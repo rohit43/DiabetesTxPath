@@ -4,39 +4,32 @@
 \alias{runStudy}
 \title{runStudy}
 \usage{
-runStudy(connectionDetails, cdmDatabaseSchema, resultsDatabaseSchema,
-  cdmVersion, outComeId, outComeName)
+runStudy(connectionDetails = connectionDetails,
+  cdmDatabaseSchema = cdmDatabaseSchema,
+  resultsDatabaseSchema = resultsDatabaseSchema, cdmVersion = cdmVersion,
+  outComeId = outComeId, outComeName = outComeName, numThread = numThread,
+  results_path = results_path)
 }
 \arguments{
 \item{connectionDetails}{The connection details of the database.}
 
-\item{cdm_database_schema}{The name of your cdm database schema.}
+\item{cdmDatabaseSchema}{The name of cdm database schema.}
 
-\item{results_database_schema}{The name of your results database schema.}
+\item{resultsDatabaseSchema}{The name of results database schema.}
 
-\item{target_database_schema}{The name of the target database schema.}
+\item{cdmVersion}{The name of cdm version, should be 5}
 
-\item{target_cohort_table}{The name of target cohort table.}
+\item{outComeId}{The outcome Id for which study need to be executed (3 = HbA1c, 4 = MI, 5 = KD and 6 = ED)}
 
-\item{numThread}{Number of threads to be used.}
+\item{outComeName}{Name of the outcome.}
 
-\item{idOne}{Treatment cohort ID}
-
-\item{idTwo}{Comparator Cohort ID}
-
-\item{idThree}{Outcome cohort ID}
-
-\item{idFour}{Outcome cohort ID}
-
-\item{idFive}{Outcome cohort ID}
-
-\item{idSix}{Outcome cohort ID}
+\item{numThread}{Number of threads.}
 }
 \details{
 This function can be used to perform the DiabetesTxPathway analysis
-end-to-end. Just supply the details and leave it running overnight. Please note
-the function will perform analysis if there are atleast 100 patients for each
-of the drug group considered in the study.
+for a given outcome of interest. Briefly, for a given drug combinations, the
+function will construct a treatment, a comparator and an outcome cohort. Will
+use the CohortMethod and perform the analysis.
 }
 \author{
 Rohit Vashisht

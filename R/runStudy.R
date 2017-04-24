@@ -68,6 +68,8 @@ runStudy <- function(connectionDetails = connectionDetails,
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
     numPidTwo <- as.numeric(as.character((querySql(conn, sql))))
     if(numPidOne < 250 || numPidTwo < 250){
+      treatment <- tcComb$treatmentCohort[i]
+      comparator <- tcComb$comparatorCohort[i]
       drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
       colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
     }else
