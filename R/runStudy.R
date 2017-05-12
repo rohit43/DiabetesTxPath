@@ -88,7 +88,10 @@ runStudy <- function(connectionDetails = connectionDetails,
                              comparator = comparator,
                              numThread = numThread)
 
-        if(length(results)>1){
+        if(length(results)<1){
+        drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
+        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+      }else if(is.numeric(results[[7]]$outcomeModelTreatmentEstimate$logRr)==TRUE & is.numeric(results[[7]]$outcomeModelTreatmentEstimate$logLb95)==TRUE & is.numeric(results[[7]]$outcomeModelTreatmentEstimate$logUb95)==TRUE & is.numeric(results[[7]]$outcomeModelTreatmentEstimate$seLogRr)==TRUE){
           drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[7]])),exp(confint(results[[7]]))[1],exp(confint(results[[7]]))[2])
           colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
           write.csv(results[[2]],file=paste(results_path,"impFeature",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
@@ -103,13 +106,14 @@ runStudy <- function(connectionDetails = connectionDetails,
           grid.table(results[[1]]) #PsAUC
           dev.off()
         }else
-        {
+          {
           drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
           colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
-        }
+          }
     }
     drugComparision <- rbind(drugComparision,drugRR_raw)
     remove(drugRR_raw)
   }
   write.csv(drugComparision, file = paste(results_path,"drugComparision","_",outComeName,".csv",sep=""))
 }
+
