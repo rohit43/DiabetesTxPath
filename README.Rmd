@@ -147,8 +147,13 @@ packageResults(connectionDetails = connectionDetails,
                workFolder = results_path, 
                dbName = cdmDatabaseSchema)
 ```
-
-
+One can do the following in order to construct the site specific treatment pathways for T2D as follows. Please note, this function will generate a .csv which will be saved in the results_path defined by the user.
+```r
+getTxPath(connectionDetails = connectionDetails,
+          cdmDatabaseSchema = cdmDatabaseSchema, 
+          resultsDatabaseSchema = resultsDatabaseSchema, 
+          results_path = results_path)
+```
 
 
 Time of execution can vary from few hours to day or two, depending on the size of the dataset you have. 
