@@ -39,7 +39,7 @@
 #' @param numThread Number of threads.
 #'
 #' @export
-runStudyTwoPath <- function(connectionDetails = connectionDetails,
+runStudy <- function(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
                      resultsDatabaseSchema = resultsDatabaseSchema,
                      cdmVersion = cdmVersion,
