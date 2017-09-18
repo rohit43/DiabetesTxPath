@@ -39,7 +39,7 @@
 #' @param numThread Number of threads.
 #'
 #' @export
-runStudy <- function(connectionDetails = connectionDetails,
+runStudyTwoPath <- function(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
                      resultsDatabaseSchema = resultsDatabaseSchema,
                      cdmVersion = cdmVersion,
@@ -48,6 +48,7 @@ runStudy <- function(connectionDetails = connectionDetails,
                      numThread = numThread,
                      results_path = results_path){
   tcComb <- read.csv(system.file(paste("settings/","treatmentComparator.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = TRUE)
+  tcComb <- tcComb[c(29,33,38),]
   conn <- DatabaseConnector::connect(connectionDetails)
   drugComparision <- data.frame()
   for(i in 1:nrow(tcComb)){
@@ -57,8 +58,8 @@ runStudy <- function(connectionDetails = connectionDetails,
                 treatment = paste(tcComb$treatmentCohort[i],".sql",sep=""),
                 comparator = paste(tcComb$comparatorCohort[i],".sql",sep=""),
                 outComeId = outComeId)
-  #Computing total number of patients in both treatment and comparator cohorts.
-  #The study will not be performed if each treatment and comparator cohorts have lesss than 250 patients.
+    #Computing total number of patients in both treatment and comparator cohorts.
+    #The study will not be performed if each treatment and comparator cohorts have lesss than 100 patients.
     sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",sep="")
     sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
@@ -67,49 +68,53 @@ runStudy <- function(connectionDetails = connectionDetails,
     sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
     numPidTwo <- as.numeric(as.character((querySql(conn, sql))))
-    if(numPidOne < 250 || numPidTwo < 250){
+    if(numPidOne < 100 || numPidTwo < 100){
       treatment <- tcComb$treatmentCohort[i]
       comparator <- tcComb$comparatorCohort[i]
       drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
       colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
     }else
     {
-        treatment <- tcComb$treatmentCohort[i]
-        comparator <- tcComb$comparatorCohort[i]
-        cid2Rm <- read.csv(system.file(paste("settings/","conceptIdToRemove.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
-        cid2Rm <- as.numeric(as.character(unique(cid2Rm$V1)))
-        results <- drugEfficacyAnalysis(connectionDetails = connectionDetails,
-                             cdmDatabaseSchema = cdmDatabaseSchema,
-                             resultsDatabaseSchema = resultsDatabaseSchema,
-                             cid2Rm = cid2Rm,
-                             outCome = outComeId,
-                             cdmVersion = cdmVersion,
-                             treatment = treatment,
-                             comparator = comparator,
-                             numThread = numThread)
+      treatment <- tcComb$treatmentCohort[i]
+      comparator <- tcComb$comparatorCohort[i]
+      cid2Rm <- read.csv(system.file(paste("settings/","conceptIdToRemove.csv",sep=""), package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = FALSE)
+      cid2Rm <- as.numeric(as.character(unique(cid2Rm$V1)))
+      results <- drugEfficacyAnalysis(connectionDetails = connectionDetails,
+                                      cdmDatabaseSchema = cdmDatabaseSchema,
+                                      resultsDatabaseSchema = resultsDatabaseSchema,
+                                      cid2Rm = cid2Rm,
+                                      outCome = outComeId,
+                                      cdmVersion = cdmVersion,
+                                      treatment = treatment,
+                                      comparator = comparator,
+                                      numThread = numThread)
 
-        if(length(results)<1){
+      if(length(results)<1){
         drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
         colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
-      }else if(is.numeric(results[[7]]$outcomeModelTreatmentEstimate$logRr)==TRUE & is.numeric(results[[7]]$outcomeModelTreatmentEstimate$logLb95)==TRUE & is.numeric(results[[7]]$outcomeModelTreatmentEstimate$logUb95)==TRUE & is.numeric(results[[7]]$outcomeModelTreatmentEstimate$seLogRr)==TRUE){
-          drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[7]])),exp(confint(results[[7]]))[1],exp(confint(results[[7]]))[2])
-          colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
-          write.csv(results[[2]],file=paste(results_path,"impFeature",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
-          pdf(file=paste(results_path,treatment,"-and-",comparator,"_",outComeName,".pdf",sep=""))
-          plot(results[[3]]) #Ps score before matching.
-          plot(results[[4]]) #Ps score after matching.
-          plot(results[[6]]) #Cov balance.
-          plot(results[[5]]) #Attr diagram.
-          plot(results[[8]]) #Km without CI
-          plot(results[[9]]) #Km with CI
-          plot.new()
-          grid.table(results[[1]]) #PsAUC
-          dev.off()
-        }else
-          {
-          drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
-          colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
-          }
+      }else if(is.numeric(results[[6]]$outcomeModelTreatmentEstimate$logRr)==TRUE & is.numeric(results[[6]]$outcomeModelTreatmentEstimate$logLb95)==TRUE & is.numeric(results[[6]]$outcomeModelTreatmentEstimate$logUb95)==TRUE & is.numeric(results[[6]]$outcomeModelTreatmentEstimate$seLogRr)==TRUE){
+        drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[6]])),exp(confint(results[[6]]))[1],exp(confint(results[[6]]))[2])
+        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+        pdf(file=paste(results_path,treatment,"-and-",comparator,"_",outComeName,".pdf",sep=""))
+        plot(results[[2]]) #Ps score before matching.
+        plot(results[[3]]) #Ps score after matching.
+        plot(results[[5]]) #Cov balance.
+        plot(results[[4]]) #Attr diagram.
+        plot(results[[7]]) #Km without CI
+        plot(results[[8]]) #Km with CI
+        plot.new()
+        grid.table(results[[1]]) #PsAUC
+        dev.off()
+        write.csv(results[[9]],file=paste(results_path,"ageBeforeMatching-",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
+        write.csv(results[[10]],file=paste(results_path,"ageAfterMatching-",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
+        write.csv(results[[11]],file=paste(results_path,"genderBeforeMatching-",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
+        write.csv(results[[12]],file=paste(results_path,"genderAfterMatching-",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
+        write.csv(results[[13]],file=paste(results_path,"stat-",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
+      }else
+      {
+        drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
+        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+      }
     }
     drugComparision <- rbind(drugComparision,drugRR_raw)
     remove(drugRR_raw)
