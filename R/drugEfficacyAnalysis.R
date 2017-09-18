@@ -104,7 +104,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
   # are at-least 250 patients in both treatment and comparator cohort after creating study population.
   tPid <- as.data.frame(table(studyPop$treatment))
   colnames(tPid) <- c("treatment", "pid")
-  if ((tPid$pid[1] < 100) || tPid$pid[2] < 100) {
+  if ((tPid$pid[1] < 250) || tPid$pid[2] < 250) {
     results <- list()
   } else {
     psScore <- createPs(cohortMethodData = cohortMethodData,

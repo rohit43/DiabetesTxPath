@@ -59,7 +59,7 @@ runStudy <- function(connectionDetails = connectionDetails,
                 comparator = paste(tcComb$comparatorCohort[i],".sql",sep=""),
                 outComeId = outComeId)
     #Computing total number of patients in both treatment and comparator cohorts.
-    #The study will not be performed if each treatment and comparator cohorts have lesss than 100 patients.
+    #The study will not be performed if each treatment and comparator cohorts have lesss than 250 patients.
     sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",sep="")
     sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
@@ -68,7 +68,7 @@ runStudy <- function(connectionDetails = connectionDetails,
     sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
     numPidTwo <- as.numeric(as.character((querySql(conn, sql))))
-    if(numPidOne < 100 || numPidTwo < 100){
+    if(numPidOne < 250 || numPidTwo < 250){
       treatment <- tcComb$treatmentCohort[i]
       comparator <- tcComb$comparatorCohort[i]
       drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
