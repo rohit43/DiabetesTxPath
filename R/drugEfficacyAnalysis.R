@@ -104,7 +104,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
   # are at-least 250 patients in both treatment and comparator cohort after creating study population.
   tPid <- as.data.frame(table(studyPop$treatment))
   colnames(tPid) <- c("treatment", "pid")
-  if ((tPid$pid[1] < 250) || tPid$pid[2] < 250) {
+  if ((tPid$pid[1] < 100) || tPid$pid[2] < 100) {
     results <- list()
   } else {
     psScore <- createPs(cohortMethodData = cohortMethodData,
@@ -166,113 +166,170 @@ drugEfficacyAnalysis <- function(connectionDetails,
       if (!is.null(cohortMethodData$metaData$deletedCovariateIds)) {
         idx <- is.na(ffbase::ffmatch(cohortMethodData$covariateRef$covariateId, ff::as.ff(cohortMethodData$metaData$deletedCovariateIds)))
         removedCovars <- ff::as.ram(cohortMethodData$covariateRef[ffbase::ffwhich(idx, idx == FALSE), ])
-      }
-      # -- Age - Before Matching ....
-      ageBeforeMatching <- balance[grep("Age group:", balance$covariateName), ]
-      ageBeforeMatching <- data.frame(group = ageBeforeMatching$covariateName,
-                        countTreated = ageBeforeMatching$beforeMatchingSumTreated,
-                        countComparator = ageBeforeMatching$beforeMatchingSumComparator,
-                        fractionTreated = ageBeforeMatching$beforeMatchingMeanTreated,
-                        fractionComparator = ageBeforeMatching$beforeMatchingMeanComparator)
-      # Add removed age group (if any):
-      removedAgeGroup <- removedCovars[grep("Age group:", removedCovars$covariateName), ]
-      if (nrow(removedAgeGroup) == 1) {
-        totalTreated <- ageBeforeMatching$countTreated[1] / ageBeforeMatching$fractionTreated[1]
-        missingFractionTreated <- 1 - sum(ageBeforeMatching$fractionTreated)
-        missingFractionComparator <- 1 - sum(ageBeforeMatching$fractionComparator)
-        removedAgeGroup <- data.frame(group = removedAgeGroup$covariateName,
-                                      countTreated = round(missingFractionTreated * totalTreated),
-                                      countComparator = round(missingFractionComparator * totalTreated),
-                                      fractionTreated = missingFractionTreated,
-                                      fractionComparator = missingFractionComparator)
-        ageBeforeMatching <- rbind(ageBeforeMatching, removedAgeGroup)
-      }
-      ageBeforeMatching$start <- gsub("Age group: ", "", gsub("-.*$", "", ageBeforeMatching$group))
-      ageBeforeMatching$start <- as.integer(ageBeforeMatching$start)
-      ageBeforeMatching <- ageBeforeMatching[order(ageBeforeMatching$start), ]
-      ageBeforeMatching$start <- NULL
-      # -- Age - After Matching ....
-      ageAfterMatching <- balance[grep("Age group:", balance$covariateName), ]
-      ageAfterMatching <- data.frame(group = ageAfterMatching$covariateName,
-                                      countTreated = ageAfterMatching$afterMatchingSumTreated,
-                                      countComparator = ageAfterMatching$afterMatchingSumComparator,
-                                      fractionTreated = ageAfterMatching$afterMatchingMeanTreated,
-                                      fractionComparator = ageAfterMatching$afterMatchingMeanComparator)
-      # Add removed age group (if any):
-      removedAgeGroup <- removedCovars[grep("Age group:", removedCovars$covariateName), ]
-      if (nrow(removedAgeGroup) == 1) {
-        totalTreated <- ageAfterMatching$countTreated[1] / ageAfterMatching$fractionTreated[1]
-        missingFractionTreated <- 1 - sum(ageAfterMatching$fractionTreated)
-        missingFractionComparator <- 1 - sum(ageAfterMatching$fractionComparator)
-        removedAgeGroup <- data.frame(group = removedAgeGroup$covariateName,
-                                      countTreated = round(missingFractionTreated * totalTreated),
-                                      countComparator = round(missingFractionComparator * totalTreated),
-                                      fractionTreated = missingFractionTreated,
-                                      fractionComparator = missingFractionComparator)
-        ageAfterMatching <- rbind(ageAfterMatching, removedAgeGroup)
-      }
-      ageAfterMatching$start <- gsub("Age group: ", "", gsub("-.*$", "", ageAfterMatching$group))
-      ageAfterMatching$start <- as.integer(ageAfterMatching$start)
-      ageAfterMatching <- ageAfterMatching[order(ageAfterMatching$start), ]
-      ageAfterMatching$start <- NULL
-      ## Gender before matching
-      genderBeforeMatching <- balance[grep("Gender", balance$covariateName), ]
-      x <- grep("during 365d", genderBeforeMatching$covariateName)
-        if(length(x)==0){
-          genderBeforeMatching <- genderBeforeMatching
+        ageBeforeMatching <- balance[grep("Age group:", balance$covariateName), ]
+        ageBeforeMatching <- data.frame(group = ageBeforeMatching$covariateName,
+                                        countTreated = ageBeforeMatching$beforeMatchingSumTreated,
+                                        countComparator = ageBeforeMatching$beforeMatchingSumComparator,
+                                        fractionTreated = ageBeforeMatching$beforeMatchingMeanTreated,
+                                        fractionComparator = ageBeforeMatching$beforeMatchingMeanComparator)
+        # Add removed age group (if any):
+        removedAgeGroup <- removedCovars[grep("Age group:", removedCovars$covariateName), ]
+        if (nrow(removedAgeGroup) == 1) {
+          totalTreated <- ageBeforeMatching$countTreated[1] / ageBeforeMatching$fractionTreated[1]
+          missingFractionTreated <- 1 - sum(ageBeforeMatching$fractionTreated)
+          missingFractionComparator <- 1 - sum(ageBeforeMatching$fractionComparator)
+          removedAgeGroup <- data.frame(group = removedAgeGroup$covariateName,
+                                        countTreated = round(missingFractionTreated * totalTreated),
+                                        countComparator = round(missingFractionComparator * totalTreated),
+                                        fractionTreated = missingFractionTreated,
+                                        fractionComparator = missingFractionComparator)
+          ageBeforeMatching <- rbind(ageBeforeMatching, removedAgeGroup)
+          ageBeforeMatching$start <- gsub("Age group: ", "", gsub("-.*$", "", ageBeforeMatching$group))
+          ageBeforeMatching$start <- as.integer(ageBeforeMatching$start)
+          ageBeforeMatching <- ageBeforeMatching[order(ageBeforeMatching$start), ]
+          ageBeforeMatching$start <- NULL
+          
+          ageAfterMatching <- balance[grep("Age group:", balance$covariateName), ]
+          ageAfterMatching <- data.frame(group = ageAfterMatching$covariateName,
+                                         countTreated = ageAfterMatching$afterMatchingSumTreated,
+                                         countComparator = ageAfterMatching$afterMatchingSumComparator,
+                                         fractionTreated = ageAfterMatching$afterMatchingMeanTreated,
+                                         fractionComparator = ageAfterMatching$afterMatchingMeanComparator)
+          # Add removed age group (if any):
+          removedAgeGroup <- removedCovars[grep("Age group:", removedCovars$covariateName), ]
+          if (nrow(removedAgeGroup) == 1) {
+            totalTreated <- ageAfterMatching$countTreated[1] / ageAfterMatching$fractionTreated[1]
+            missingFractionTreated <- 1 - sum(ageAfterMatching$fractionTreated)
+            missingFractionComparator <- 1 - sum(ageAfterMatching$fractionComparator)
+            removedAgeGroup <- data.frame(group = removedAgeGroup$covariateName,
+                                          countTreated = round(missingFractionTreated * totalTreated),
+                                          countComparator = round(missingFractionComparator * totalTreated),
+                                          fractionTreated = missingFractionTreated,
+                                          fractionComparator = missingFractionComparator)
+            ageAfterMatching <- rbind(ageAfterMatching, removedAgeGroup)
+          }
+          ageAfterMatching$start <- gsub("Age group: ", "", gsub("-.*$", "", ageAfterMatching$group))
+          ageAfterMatching$start <- as.integer(ageAfterMatching$start)
+          ageAfterMatching <- ageAfterMatching[order(ageAfterMatching$start), ]
+          ageAfterMatching$start <- NULL
+          
+          ## Gender before matching
+          genderBeforeMatching <- balance[grep("Gender", balance$covariateName), ]
+          x <- grep("during 365d", genderBeforeMatching$covariateName)
+          if(length(x)==0){
+            genderBeforeMatching <- genderBeforeMatching
+          }else
+          {
+            genderBeforeMatching <- genderBeforeMatching[-x,]
+          }
+          remove(x)
+          genderBeforeMatching <- data.frame(group = genderBeforeMatching$covariateName,
+                                             countTreated = genderBeforeMatching$beforeMatchingSumTreated,
+                                             countComparator = genderBeforeMatching$beforeMatchingSumComparator,
+                                             fractionTreated = genderBeforeMatching$beforeMatchingMeanTreated,
+                                             fractionComparator = genderBeforeMatching$beforeMatchingMeanComparator)
+          # Add removed gender (if any):
+          removedGender <- removedCovars[grep("Gender", removedCovars$covariateName), ]
+          if (nrow(removedGender) == 1) {
+            totalTreated <- genderBeforeMatching$countTreated[1] / genderBeforeMatching$fractionTreated[1]
+            missingFractionTreated <- 1 - sum(genderBeforeMatching$fractionTreated)
+            missingFractionComparator <- 1 - sum(genderBeforeMatching$fractionComparator)
+            removedGender <- data.frame(group = removedGender$covariateName,
+                                        countTreated = round(missingFractionTreated * totalTreated),
+                                        countComparator = round(missingFractionComparator * totalTreated),
+                                        fractionTreated = missingFractionTreated,
+                                        fractionComparator = missingFractionComparator)
+            genderBeforeMatching <- rbind(genderBeforeMatching, removedGender)
+          }
+          genderBeforeMatching$group <- gsub("Gender = ", "", genderBeforeMatching$group)
+          ## Gender --- After Matching
+          genderAfterMatching <- balance[grep("Gender", balance$covariateName), ]
+          x <- grep("during 365d", genderAfterMatching$covariateName)
+          if(length(x)==0){
+            genderAfterMatching <- genderAfterMatching
+          }else
+          {
+            genderAfterMatching <- genderAfterMatching[-x,]
+          }
+          remove(x)
+          genderAfterMatching <- data.frame(group = genderAfterMatching$covariateName,
+                                            countTreated = genderAfterMatching$afterMatchingSumTreated,
+                                            countComparator = genderAfterMatching$afterMatchingSumComparator,
+                                            fractionTreated = genderAfterMatching$afterMatchingMeanTreated,
+                                            fractionComparator = genderAfterMatching$afterMatchingMeanComparator)
+          # Add removed gender (if any):
+          removedGender <- removedCovars[grep("Gender", removedCovars$covariateName), ]
+          if (nrow(removedGender) == 1) {
+            totalTreated <- genderAfterMatching$countTreated[1] / genderAfterMatching$fractionTreated[1]
+            missingFractionTreated <- 1 - sum(genderAfterMatching$fractionTreated)
+            missingFractionComparator <- 1 - sum(genderAfterMatching$fractionComparator)
+            removedGender <- data.frame(group = removedGender$covariateName,
+                                        countTreated = round(missingFractionTreated * totalTreated),
+                                        countComparator = round(missingFractionComparator * totalTreated),
+                                        fractionTreated = missingFractionTreated,
+                                        fractionComparator = missingFractionComparator)
+            genderAfterMatching <- rbind(genderAfterMatching, removedGender)
+          }
+          genderAfterMatching$group <- gsub("Gender = ", "", genderAfterMatching$group)
+          
+          
         }else
         {
-          genderBeforeMatching <- genderBeforeMatching[-x,]
+          ageBeforeMatching <- balance[grep("Age group:", balance$covariateName), ]
+          ageBeforeMatching <- data.frame(group = ageBeforeMatching$covariateName,
+                                          countTreated = ageBeforeMatching$beforeMatchingSumTreated,
+                                          countComparator = ageBeforeMatching$beforeMatchingSumComparator,
+                                          fractionTreated = ageBeforeMatching$beforeMatchingMeanTreated,
+                                          fractionComparator = ageBeforeMatching$beforeMatchingMeanComparator)
+          ageBeforeMatching$start <- gsub("Age group: ", "", gsub("-.*$", "", ageBeforeMatching$group))
+          ageBeforeMatching$start <- as.integer(ageBeforeMatching$start)
+          ageBeforeMatching <- ageBeforeMatching[order(ageBeforeMatching$start), ]
+          ageBeforeMatching$start <- NULL
+          
+          ageAfterMatching <- balance[grep("Age group:", balance$covariateName), ]
+          ageAfterMatching <- data.frame(group = ageAfterMatching$covariateName,
+                                         countTreated = ageAfterMatching$afterMatchingSumTreated,
+                                         countComparator = ageAfterMatching$afterMatchingSumComparator,
+                                         fractionTreated = ageAfterMatching$afterMatchingMeanTreated,
+                                         fractionComparator = ageAfterMatching$afterMatchingMeanComparator)
+          ageAfterMatching$start <- gsub("Age group: ", "", gsub("-.*$", "", ageAfterMatching$group))
+          ageAfterMatching$start <- as.integer(ageAfterMatching$start)
+          ageAfterMatching <- ageAfterMatching[order(ageAfterMatching$start), ]
+          ageAfterMatching$start <- NULL
+          
+          genderBeforeMatching <- balance[grep("Gender", balance$covariateName), ]
+          x <- grep("during 365d", genderBeforeMatching$covariateName)
+          if(length(x)==0){
+            genderBeforeMatching <- genderBeforeMatching
+          }else
+          {
+            genderBeforeMatching <- genderBeforeMatching[-x,]
+          }
+          remove(x)
+          genderBeforeMatching <- data.frame(group = genderBeforeMatching$covariateName,
+                                             countTreated = genderBeforeMatching$beforeMatchingSumTreated,
+                                             countComparator = genderBeforeMatching$beforeMatchingSumComparator,
+                                             fractionTreated = genderBeforeMatching$beforeMatchingMeanTreated,
+                                             fractionComparator = genderBeforeMatching$beforeMatchingMeanComparator)
+          genderBeforeMatching$group <- gsub("Gender = ", "", genderBeforeMatching$group)
+          
+          genderAfterMatching <- balance[grep("Gender", balance$covariateName), ]
+          x <- grep("during 365d", genderAfterMatching$covariateName)
+          if(length(x)==0){
+            genderAfterMatching <- genderAfterMatching
+          }else
+          {
+            genderAfterMatching <- genderAfterMatching[-x,]
+          }
+          remove(x)
+          genderAfterMatching <- data.frame(group = genderAfterMatching$covariateName,
+                                            countTreated = genderAfterMatching$afterMatchingSumTreated,
+                                            countComparator = genderAfterMatching$afterMatchingSumComparator,
+                                            fractionTreated = genderAfterMatching$afterMatchingMeanTreated,
+                                            fractionComparator = genderAfterMatching$afterMatchingMeanComparator)
+          genderAfterMatching$group <- gsub("Gender = ", "", genderAfterMatching$group)
         }
-      remove(x)
-      genderBeforeMatching <- data.frame(group = genderBeforeMatching$covariateName,
-                           countTreated = genderBeforeMatching$beforeMatchingSumTreated,
-                           countComparator = genderBeforeMatching$beforeMatchingSumComparator,
-                           fractionTreated = genderBeforeMatching$beforeMatchingMeanTreated,
-                           fractionComparator = genderBeforeMatching$beforeMatchingMeanComparator)
-      # Add removed gender (if any):
-      removedGender <- removedCovars[grep("Gender", removedCovars$covariateName), ]
-      if (nrow(removedGender) == 1) {
-        totalTreated <- genderBeforeMatching$countTreated[1] / genderBeforeMatching$fractionTreated[1]
-        missingFractionTreated <- 1 - sum(genderBeforeMatching$fractionTreated)
-        missingFractionComparator <- 1 - sum(genderBeforeMatching$fractionComparator)
-        removedGender <- data.frame(group = removedGender$covariateName,
-                                    countTreated = round(missingFractionTreated * totalTreated),
-                                    countComparator = round(missingFractionComparator * totalTreated),
-                                    fractionTreated = missingFractionTreated,
-                                    fractionComparator = missingFractionComparator)
-        genderBeforeMatching <- rbind(genderBeforeMatching, removedGender)
       }
-      genderBeforeMatching$group <- gsub("Gender = ", "", genderBeforeMatching$group)
-      ## Gender --- After Matching
-      genderAfterMatching <- balance[grep("Gender", balance$covariateName), ]
-      x <- grep("during 365d", genderAfterMatching$covariateName)
-      if(length(x)==0){
-        genderAfterMatching <- genderAfterMatching
-      }else
-      {
-        genderAfterMatching <- genderAfterMatching[-x,]
-      }
-      remove(x)
-      genderAfterMatching <- data.frame(group = genderAfterMatching$covariateName,
-                                         countTreated = genderAfterMatching$afterMatchingSumTreated,
-                                         countComparator = genderAfterMatching$afterMatchingSumComparator,
-                                         fractionTreated = genderAfterMatching$afterMatchingMeanTreated,
-                                         fractionComparator = genderAfterMatching$afterMatchingMeanComparator)
-      # Add removed gender (if any):
-      removedGender <- removedCovars[grep("Gender", removedCovars$covariateName), ]
-      if (nrow(removedGender) == 1) {
-        totalTreated <- genderAfterMatching$countTreated[1] / genderAfterMatching$fractionTreated[1]
-        missingFractionTreated <- 1 - sum(genderAfterMatching$fractionTreated)
-        missingFractionComparator <- 1 - sum(genderAfterMatching$fractionComparator)
-        removedGender <- data.frame(group = removedGender$covariateName,
-                                    countTreated = round(missingFractionTreated * totalTreated),
-                                    countComparator = round(missingFractionComparator * totalTreated),
-                                    fractionTreated = missingFractionTreated,
-                                    fractionComparator = missingFractionComparator)
-        genderAfterMatching <- rbind(genderAfterMatching, removedGender)
-      }
-      genderAfterMatching$group <- gsub("Gender = ", "", genderAfterMatching$group)
       #------ Getting mean HbA1c before matching for all the patients
       if(outCome==3){
         conn <- DatabaseConnector::connect(connectionDetails)
