@@ -117,8 +117,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
     allPsScore <- unique(psScore$propensityScore)
     if(length(allPsScore)==1){
       results <- list()
-    }else
-    {
+    }else{
       psAUC <- computePsAuc(psScore,
                             confidenceIntervals = TRUE)
       psScoreBeforeMatching <- plotPs(psScore,
@@ -354,8 +353,14 @@ drugEfficacyAnalysis <- function(connectionDetails,
           remove(avgHbA1cBefTx, avgHbA1cAftTx, sqlOne, sqlTwo)
         }
         #making sure we are not considering lab values that are miss reported.
-        HbA1cAftTx_treatment <- subset(HbA1cAftTx_treatment,AVG<100)
-        HbA1cBefTx_treatment <- subset(HbA1cBefTx_treatment,AVG<100)
+        if(nrow(HbA1cBefTx_treatment)!=0&nrow(HbA1cBefTx_treatment)!=0){
+          HbA1cAftTx_treatment <- subset(HbA1cAftTx_treatment,AVG<100)
+          HbA1cBefTx_treatment <- subset(HbA1cBefTx_treatment,AVG<100)
+        }else
+        {
+          HbA1cAftTx_treatment <- data.frame()
+          HbA1cBefTx_treatment <- data.frame()
+        }
         #Getting for the comparator
         HbA1cBefTx_comparator <- data.frame()
         HbA1cAftTx_comparator <- data.frame()
@@ -373,19 +378,32 @@ drugEfficacyAnalysis <- function(connectionDetails,
           remove(avgHbA1cBefTx, avgHbA1cAftTx, sqlOne, sqlTwo)
         }
         #making sure we are not considering lab values that are miss reported.
-        HbA1cAftTx_comparator <- subset(HbA1cAftTx_comparator,AVG<100)
-        HbA1cBefTx_comparator <- subset(HbA1cBefTx_comparator,AVG<100)
-        meanTreatBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_treatment$AVG)))
-        sdTreatBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_treatment$AVG)))
-        meanTreatAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_treatment$AVG)))
-        sdTreatAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_treatment$AVG)))
-        meanCompBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_comparator$AVG)))
-        sdCompBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_comparator$AVG)))
-        meanCompAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_comparator$AVG)))
-        sdCompAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_comparator$AVG)))
-        unMatchedHbA1cMeanSd <- data.frame(cbind(meanTreatBefIndex,sdTreatBefIndex,meanTreatAftIndex,sdTreatAftIndex,meanCompBefIndex,sdCompBefIndex,meanCompAftIndex,sdCompAftIndex))
-        colnames(unMatchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
-        remove(HbA1cAftTx_comparator,HbA1cAftTx_treatment,HbA1cBefTx_comparator,HbA1cBefTx_treatment,studyPopHba1c,studyPopHba1cComparator,studyPopHba1cTreatment)
+        if(nrow(HbA1cBefTx_comparator)!=0&nrow(HbA1cAftTx_comparator)!=0){
+          HbA1cAftTx_comparator <- subset(HbA1cAftTx_comparator,AVG<100)
+          HbA1cBefTx_comparator <- subset(HbA1cBefTx_comparator,AVG<100)
+        }else
+        {
+          HbA1cAftTx_comparator <- data.frame()
+          HbA1cBefTx_comparator <- data.frame()
+        }
+
+        if(nrow(HbA1cBefTx_treatment)!=0&nrow(HbA1cAftTx_treatment)!=0&nrow(HbA1cBefTx_comparator)!=0&nrow(HbA1cAftTx_comparator)!=0){
+          meanTreatBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_treatment$AVG)))
+          sdTreatBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_treatment$AVG)))
+          meanTreatAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_treatment$AVG)))
+          sdTreatAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_treatment$AVG)))
+          meanCompBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_comparator$AVG)))
+          sdCompBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_comparator$AVG)))
+          meanCompAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_comparator$AVG)))
+          sdCompAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_comparator$AVG)))
+          unMatchedHbA1cMeanSd <- data.frame(cbind(meanTreatBefIndex,sdTreatBefIndex,meanTreatAftIndex,sdTreatAftIndex,meanCompBefIndex,sdCompBefIndex,meanCompAftIndex,sdCompAftIndex))
+          colnames(unMatchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
+          remove(HbA1cAftTx_comparator,HbA1cAftTx_treatment,HbA1cBefTx_comparator,HbA1cBefTx_treatment,studyPopHba1c,studyPopHba1cComparator,studyPopHba1cTreatment)
+        } else
+        {
+          unMatchedHbA1cMeanSd <- data.frame(NA,NA,NA,NA,NA,NA,NA,NA)
+          colnames(unMatchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
+        }
 
         #Matched Cohort
         studyPopHba1c <- subset(matchedPop,outcomeCount>0)
@@ -406,9 +424,14 @@ drugEfficacyAnalysis <- function(connectionDetails,
           HbA1cAftTx_treatment <- rbind(HbA1cAftTx_treatment,avgHbA1cAftTx)
           remove(avgHbA1cBefTx, avgHbA1cAftTx, sqlOne, sqlTwo)
         }
-        #making sure we are not considering lab values that are miss reported.
-        HbA1cAftTx_treatment <- subset(HbA1cAftTx_treatment,AVG<100)
-        HbA1cBefTx_treatment <- subset(HbA1cBefTx_treatment,AVG<100)
+        if(nrow(HbA1cBefTx_treatment)!=0&nrow(HbA1cBefTx_treatment)!=0){
+          HbA1cAftTx_treatment <- subset(HbA1cAftTx_treatment,AVG<100)
+          HbA1cBefTx_treatment <- subset(HbA1cBefTx_treatment,AVG<100)
+        }else
+        {
+          HbA1cAftTx_treatment <- data.frame()
+          HbA1cBefTx_treatment <- data.frame()
+        }
         #Getting for the comparator
         HbA1cBefTx_comparator <- data.frame()
         HbA1cAftTx_comparator <- data.frame()
@@ -426,19 +449,31 @@ drugEfficacyAnalysis <- function(connectionDetails,
           remove(avgHbA1cBefTx, avgHbA1cAftTx, sqlOne, sqlTwo)
         }
         #making sure we are not considering lab values that are miss reported.
-        HbA1cAftTx_comparator <- subset(HbA1cAftTx_comparator,AVG<100)
-        HbA1cBefTx_comparator <- subset(HbA1cBefTx_comparator,AVG<100)
-        meanTreatBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_treatment$AVG)))
-        sdTreatBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_treatment$AVG)))
-        meanTreatAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_treatment$AVG)))
-        sdTreatAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_treatment$AVG)))
-        meanCompBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_comparator$AVG)))
-        sdCompBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_comparator$AVG)))
-        meanCompAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_comparator$AVG)))
-        sdCompAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_comparator$AVG)))
-        matchedHbA1cMeanSd <- data.frame(cbind(meanTreatBefIndex,sdTreatBefIndex,meanTreatAftIndex,sdTreatAftIndex,meanCompBefIndex,sdCompBefIndex,meanCompAftIndex,sdCompAftIndex))
-        colnames(matchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
-        remove(HbA1cAftTx_comparator,HbA1cAftTx_treatment,HbA1cBefTx_comparator,HbA1cBefTx_treatment,studyPopHba1c,studyPopHba1cComparator,studyPopHba1cTreatment)
+        if(nrow(HbA1cBefTx_comparator)!=0&nrow(HbA1cAftTx_comparator)!=0){
+          HbA1cAftTx_comparator <- subset(HbA1cAftTx_comparator,AVG<100)
+          HbA1cBefTx_comparator <- subset(HbA1cBefTx_comparator,AVG<100)
+        }else
+        {
+          HbA1cAftTx_comparator <- data.frame()
+          HbA1cBefTx_comparator <- data.frame()
+        }
+        if(nrow(HbA1cBefTx_treatment)!=0&nrow(HbA1cAftTx_treatment)!=0&nrow(HbA1cBefTx_comparator)!=0&nrow(HbA1cAftTx_comparator)!=0){
+          meanTreatBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_treatment$AVG)))
+          sdTreatBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_treatment$AVG)))
+          meanTreatAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_treatment$AVG)))
+          sdTreatAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_treatment$AVG)))
+          meanCompBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_comparator$AVG)))
+          sdCompBefIndex <- as.numeric(as.character(sd(HbA1cBefTx_comparator$AVG)))
+          meanCompAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_comparator$AVG)))
+          sdCompAftIndex <- as.numeric(as.character(sd(HbA1cAftTx_comparator$AVG)))
+          matchedHbA1cMeanSd <- data.frame(cbind(meanTreatBefIndex,sdTreatBefIndex,meanTreatAftIndex,sdTreatAftIndex,meanCompBefIndex,sdCompBefIndex,meanCompAftIndex,sdCompAftIndex))
+          colnames(matchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
+          remove(HbA1cAftTx_comparator,HbA1cAftTx_treatment,HbA1cBefTx_comparator,HbA1cBefTx_treatment,studyPopHba1c,studyPopHba1cComparator,studyPopHba1cTreatment)
+        } else
+        {
+          matchedHbA1cMeanSd <- data.frame(NA,NA,NA,NA,NA,NA,NA,NA)
+          colnames(matchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
+        }
         hbA1cStat <- rbind(unMatchedHbA1cMeanSd,matchedHbA1cMeanSd)
         rownames(hbA1cStat) <- c("unMatched","matched")
         remove(unMatchedHbA1cMeanSd,matchedHbA1cMeanSd)
