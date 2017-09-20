@@ -340,10 +340,10 @@ drugEfficacyAnalysis <- function(connectionDetails,
         HbA1cBefTx_treatment <- data.frame()
         HbA1cAftTx_treatment <- data.frame()
         for(i in 1:nrow(studyPopHba1cTreatment)){
-          sqlOne <- paste("SELECT AVG(VALUE_AS_NUMBER) FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cTreatment$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE < ","'",studyPopHba1cTreatment$cohortStartDate[i],"'",sep="")
+          sqlOne <- paste("SELECT AVG(VALUE_AS_NUMBER) AS AVG FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cTreatment$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE < ","'",studyPopHba1cTreatment$cohortStartDate[i],"'",sep="")
           sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
           sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-          sqlTwo <- paste("SELECT AVG(VALUE_AS_NUMBER) FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cTreatment$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE > ","'",studyPopHba1cTreatment$cohortStartDate[i],"'",sep="")
+          sqlTwo <- paste("SELECT AVG(VALUE_AS_NUMBER) AS AVG FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cTreatment$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE > ","'",studyPopHba1cTreatment$cohortStartDate[i],"'",sep="")
           sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
           sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
           avgHbA1cBefTx <- querySql(conn, sqlOne)
@@ -365,10 +365,10 @@ drugEfficacyAnalysis <- function(connectionDetails,
         HbA1cBefTx_comparator <- data.frame()
         HbA1cAftTx_comparator <- data.frame()
         for(i in 1:nrow(studyPopHba1cComparator)){
-          sqlOne <- paste("SELECT AVG(VALUE_AS_NUMBER) FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cComparator$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE < ","'",studyPopHba1cComparator$cohortStartDate[i],"'",sep="")
+          sqlOne <- paste("SELECT AVG(VALUE_AS_NUMBER) AS AVG FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cComparator$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE < ","'",studyPopHba1cComparator$cohortStartDate[i],"'",sep="")
           sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
           sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-          sqlTwo <- paste("SELECT AVG(VALUE_AS_NUMBER) FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cComparator$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE > ","'",studyPopHba1cComparator$cohortStartDate[i],"'",sep="")
+          sqlTwo <- paste("SELECT AVG(VALUE_AS_NUMBER) AS AVG FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID = ",studyPopHba1cComparator$subjectId[i], " AND MEASUREMENT_CONCEPT_ID IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND MEASUREMENT_DATE > ","'",studyPopHba1cComparator$cohortStartDate[i],"'",sep="")
           sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
           sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
           avgHbA1cBefTx <- querySql(conn, sqlOne)
