@@ -31,7 +31,7 @@ drugEfficacyAnalysis(connectionDetails, cdmDatabaseSchema,
 This function can be used to perform the drug efficacy analysis. Very briefly, this function a)
 obtain treatment and comparator cohorts from target schema b) perform patient-level propensity
 score matching c) perform cox-proportional hazard modeling of the given outcome. Please note this
-function can only performe analysis if there are > 150 patients in both treatment and comparator
+function can only performe analysis if there are > 250 patients in both treatment and comparator
 cohorts. Right now I've hard coded these values. May be in the future we'll see how to generalize
 this.
 }
