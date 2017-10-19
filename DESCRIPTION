@@ -18,7 +18,8 @@ Imports:
     ggplot2,
     ff,
     ffbase
-Remotes: OHDSI/OhdsiRTools
+Remotes:
+    OHDSI/OhdsiRTools
     OHDSI/OhdsiSharing
     OHDSI/DatabaseConnector
     OHDSI/CohortMethod
