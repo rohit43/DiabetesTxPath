@@ -18,6 +18,13 @@ Imports:
     ggplot2,
     ff,
     ffbase
+Remotes:
+    OHDSI/OhdsiRTools,
+    OHDSI/OhdsiSharing,
+    OHDSI/DatabaseConnector,
+    OHDSI/CohortMethod,
+    OHDSI/SqlRender,
+    OHDSI/FeatureExtraction
 License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
