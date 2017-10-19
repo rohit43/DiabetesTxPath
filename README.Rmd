@@ -15,18 +15,6 @@ install_github("rohit43/DiabetesTxPath")
 ```
 
 ## Step-2
-Load the required libraries as follows:
-
-```r
-library("OhdsiRTools")
-library("OhdsiSharing")
-library("SqlRender")
-library("DatabaseConnector")
-library("CohortMethod")
-library("gridExtra")
-library("DiabetesTxPath")
-```
-## Step-3
 Setup your JBC driver environment and connection details as follows:
 ```r
 jdbcDrivers <- new.env()
@@ -37,7 +25,7 @@ connectionDetails <- createConnectionDetails(dbms = "yourDatabase",
                                              port = "yourPort")
 ```
 
-## Step-4
+## Step-3
 Provide database schema name and other details as follows.
 
 ```r
@@ -49,7 +37,7 @@ cdmVersion <- "5" #do not change this. Please note, this study can only be execu
 numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
 ```
 
-## Step-5
+## Step-4
 The complete study can be executed with a single function as shown below. Please note, this function will run the study for all the 4 different outcomes a) HbA1c b)Mycoardial Infraction c)Kidney Disease and d)Eyes related disorders considered in this analysis. Please reffer to ## Step-6 onwards in order to run the study for each of these outcomes seprately. The script to run the complete study is below:
 
 ```r
