@@ -50,7 +50,7 @@ numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :)
 ```
 
 ## Step-5
-The complete study can be executed with a single function as shown below. Please note, this function will run the study for all the 4 different outcomes a) HbA1c b)Mycoardial Infraction c)Kidney Disease and d)Eyes related disorders considered in this analysis. Please reffer to ## Step-6 onwards in order to run the study for each of these outcomes seprately. The script to run the complete study is below:
+The complete study can be executed with a single function as shown below. Please note, this function will run the study for all the 4 different outcomes a)HbA1c b)Myocardial Infraction c)Kidney Disease and d)Eyes related disorders considered in this analysis.The script to run the complete study is below:
 
 ```r
 runCompleteStudy(connectionDetails = connectionDetails,
