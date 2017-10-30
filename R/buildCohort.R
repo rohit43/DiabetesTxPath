@@ -53,7 +53,7 @@ buildCohort <- function(connectionDetails,
   targetDatabaseSchema <- resultsDatabaseSchema
   targetCohortTable <- "ohdsi_t2dpathway"
   conn <- DatabaseConnector::connect(connectionDetails)
-  sql <- "IF OBJECT_ID('@results_database_schema.@targetCohortTable', 'U') IS NOT NULL\n  DROP TABLE @results_database_schema.@target_cohort_table;\n    CREATE TABLE @results_database_schema.@target_cohort_table (cohort_definition_id INT, subject_id BIGINT, cohort_start_date DATE, cohort_end_date DATE);"
+  sql <- "IF OBJECT_ID('@results_database_schema.@target_cohort_table', 'U') IS NOT NULL\n  DROP TABLE @results_database_schema.@target_cohort_table;\n    CREATE TABLE @results_database_schema.@target_cohort_table (cohort_definition_id INT, subject_id BIGINT, cohort_start_date DATE, cohort_end_date DATE);"
   sql <- SqlRender::renderSql(sql,
                               results_database_schema = resultsDatabaseSchema,
                               target_cohort_table = targetCohortTable)$sql
