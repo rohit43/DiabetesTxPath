@@ -99,6 +99,27 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                     addExposureDaysToStart = FALSE,
                                     riskWindowEnd = 0,
                                     addExposureDaysToEnd = TRUE)
+  tStudyPid <- nrow(studyPop)
+  conn <- DatabaseConnector::connect(connectionDetails)
+  sqlOne <- paste("SELECT person_id, MAX(value_as_number) AS maxVal FROM @cdmDatabaseSchema.MEASUREMENT WHERE PERSON_ID IN (",paste(studyPop$subjectId,collapse=",",sep=","), ") AND measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) GROUP BY person_id ORDER BY maxVal DESC", sep="")
+  sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
+  sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
+  pidTabValues <- querySql(conn, sqlOne)
+  remove(sqlOne)
+  #Find out patients who did not qualify in the SQL query
+  pidNoMesInfo <- subset(studyPop, !(subjectId %in% pidTabValues$PERSON_ID))
+  pidTabValues <- subset(pidTabValues,MAXVAL<200)
+  x <- which(studyPop$subjectId %in% pidTabValues$PERSON_ID)
+  studyPop <- studyPop[x,]
+  if(nrow(pidNoMesInfo)!=0){
+    studyPop <- rbind(studyPop,pidNoMesInfo)
+  }else{
+    studyPop <- studyPop
+  }
+  print(paste("**************************************************************************************************************",sep=""))
+  print(paste("Fraction of patients removed = ",round((100 - as.numeric(nrow(studyPop)/tStudyPid)*100),3)," %",sep=""))
+  print(paste("**************************************************************************************************************",sep=""))
+  remove(x,tStudyPid,pidTabValues,pidNoMesInfo)
   tPid <- as.data.frame(table(studyPop$treatment))
   colnames(tPid) <- c("treatment", "pid")
   if ((tPid$pid[1] < 250) || tPid$pid[2] < 250) {
