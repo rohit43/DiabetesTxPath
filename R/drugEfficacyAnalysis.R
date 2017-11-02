@@ -108,7 +108,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
   remove(sqlOne)
   #Find out patients who did not qualify in the SQL query
   pidNoMesInfo <- subset(studyPop, !(subjectId %in% pidTabValues$PERSON_ID))
-  pidTabValues <- subset(pidTabValues,MAXVAL<200)
+  pidTabValues <- subset(pidTabValues,MAXVAL<100)
   x <- which(studyPop$subjectId %in% pidTabValues$PERSON_ID)
   studyPop <- studyPop[x,]
   if(nrow(pidNoMesInfo)!=0){
