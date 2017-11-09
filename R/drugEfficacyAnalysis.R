@@ -385,10 +385,10 @@ drugEfficacyAnalysis <- function(connectionDetails,
                     createTable = TRUE,
                     tempTable = TRUE,
                     oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
         HbA1cBefTx_treatment <- querySql(conn, sqlOne)
@@ -403,10 +403,10 @@ drugEfficacyAnalysis <- function(connectionDetails,
                     createTable = TRUE,
                     tempTable = TRUE,
                     oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
         HbA1cBefTx_comparator <- querySql(conn, sqlOne)
@@ -444,10 +444,10 @@ drugEfficacyAnalysis <- function(connectionDetails,
                     createTable = TRUE,
                     tempTable = TRUE,
                     oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
         HbA1cBefTx_treatment <- querySql(conn, sqlOne)
@@ -462,10 +462,10 @@ drugEfficacyAnalysis <- function(connectionDetails,
                     createTable = TRUE,
                     tempTable = TRUE,
                     oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  TO_DATE(o.COHORTSTARTDATE, 'DD-MON-YYYY')",sep="")
+        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
         sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
         HbA1cBefTx_comparator <- querySql(conn, sqlOne)
@@ -477,7 +477,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
           meanTreatAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_treatment$AVG)))
           sdTreatAftIndex <- as.numeric(as.character(HbA1cAftTx_treatment$STD))
           meanCompBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_comparator$AVG)))
-          sdCompBefIndex <- as.numeric(as.character(HbA1cBefTx_comparator$STD))
+          sdCompBefIndex <- as.numeric(as.character(HbA1cBefTx_comparator$STD))S
           meanCompAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_comparator$AVG)))
           sdCompAftIndex <- as.numeric(as.character(HbA1cAftTx_comparator$STD))
           matchedHbA1cMeanSd <- data.frame(cbind(meanTreatBefIndex,sdTreatBefIndex,meanTreatAftIndex,sdTreatAftIndex,meanCompBefIndex,sdCompBefIndex,meanCompAftIndex,sdCompAftIndex))
