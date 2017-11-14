@@ -59,7 +59,7 @@ runStudy <- function(connectionDetails = connectionDetails,
                 comparator = paste(tcComb$comparatorCohort[i],".sql",sep=""),
                 outComeId = outComeId)
     #Computing total number of patients in both treatment and comparator cohorts.
-    #The study will not be performed if each treatment and comparator cohorts have lesss than 250 patients.
+    #The study will not be performed if each treatment and comparator cohorts have lesss than 100 patients.
     sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",sep="")
     sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
@@ -71,8 +71,8 @@ runStudy <- function(connectionDetails = connectionDetails,
     if(numPidOne < 250 || numPidTwo < 250){
       treatment <- tcComb$treatmentCohort[i]
       comparator <- tcComb$comparatorCohort[i]
-      drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
-      colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+      drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA,NA,NA,NA,NA)
+      colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","expRR","expLowCI","expUpCI","logRR","logLowCI","logUpCI","selogR")
     }else
     {
       treatment <- tcComb$treatmentCohort[i]
@@ -90,11 +90,11 @@ runStudy <- function(connectionDetails = connectionDetails,
                                       numThread = numThread)
 
       if(length(results)<1){
-        drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
-        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+        drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA,NA,NA,NA,NA)
+        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","expRR","expLowCI","expUpCI","logRR","logLowCI","logUpCI","selogR")
       }else if(is.numeric(results[[6]]$outcomeModelTreatmentEstimate$logRr)==TRUE & is.numeric(results[[6]]$outcomeModelTreatmentEstimate$logLb95)==TRUE & is.numeric(results[[6]]$outcomeModelTreatmentEstimate$logUb95)==TRUE & is.numeric(results[[6]]$outcomeModelTreatmentEstimate$seLogRr)==TRUE){
-        drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[6]])),exp(confint(results[[6]]))[1],exp(confint(results[[6]]))[2])
-        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+        drugRR_raw <- cbind(treatment,comparator,outComeName,exp(coef(results[[6]])),exp(confint(results[[6]]))[1],exp(confint(results[[6]]))[2],results[[6]]$outcomeModelTreatmentEstimate$logRr,results[[6]]$outcomeModelTreatmentEstimate$logLb95,results[[6]]$outcomeModelTreatmentEstimate$logUb95,results[[6]]$outcomeModelTreatmentEstimate$seLogRr)
+        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","expRR","expLowCI","expUpCI","logRR","logLowCI","logUpCI","selogR")
         pdf(file=paste(results_path,treatment,"-and-",comparator,"_",outComeName,".pdf",sep=""))
         plot(results[[2]]) #Ps score before matching.
         plot(results[[3]]) #Ps score after matching.
@@ -112,13 +112,14 @@ runStudy <- function(connectionDetails = connectionDetails,
         write.csv(results[[13]],file=paste(results_path,"stat-",treatment,"-and-",comparator,"_",outComeName,".csv",sep=""))
       }else
       {
-        drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA)
-        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","RR","lowCI","upCI")
+        drugRR_raw <- cbind(treatment,comparator,outComeName,NA,NA,NA,NA,NA,NA,NA)
+        colnames(drugRR_raw) <- c("Treatment","Comparator","outCome","expRR","expLowCI","expUpCI","logRR","logLowCI","logUpCI","selogR")
       }
     }
     drugComparision <- rbind(drugComparision,drugRR_raw)
     remove(drugRR_raw)
   }
   write.csv(drugComparision, file = paste(results_path,"drugComparision","_",outComeName,".csv",sep=""))
+  return(drugComparision)
 }
 

@@ -90,7 +90,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                             covariateSettings = covariateSettings)
   #------ New Change ------
   #Do not ship/share this table at any cost. You should delete this once the study completes.
-  saveCohortMethodData(cohortMethodData, paste(treatment,"_",comparator,"_",outCome,sep=""))
+  saveCohortMethodData(cohortMethodData, paste(results_path,treatment,"_",comparator,"_",outCome,sep=""))
   studyPop <- createStudyPopulation(cohortMethodData = cohortMethodData,
                                     outcomeId = outCome,
                                     firstExposureOnly = FALSE,
@@ -150,7 +150,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
 
     #---- Saving psScore - Name will be same as treatment and comparator cohort ------#
     #--- Do not ship/share this. Make sure to delete this table once you finished the study.
-    write.table(psScore, file = paste(treatment,"_",comparator,"_",outCome,"_psScore.RData",sep=""))
+    write.table(psScore, file = paste(results_path,treatment,"_",comparator,"_",outCome,"_psScore.RData",sep=""))
     allPsScore <- unique(psScore$propensityScore)
     if(length(allPsScore)==1){
       results <- list()
@@ -371,16 +371,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
       #------ Getting mean HbA1c before matching for all the patients
       if(outCome==3){
         conn <- DatabaseConnector::connect(connectionDetails)
-        #Get total number of T and C patients
-        sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",sep="")
-        sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
-        sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-        numPidOne <- as.numeric(as.character((querySql(conn, sql))))
-        sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 2",sep="")
-        sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
-        sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-        numPidTwo <- as.numeric(as.character((querySql(conn, sql))))
-        remove(sql)
         insertTable(conn,
                     "ohdsiT2DstudyPop",
                     studyPop,
@@ -399,7 +389,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
                         ON m.person_id = o.SUBJECTID
                         WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971)
                         AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
-                        AND m.measurement_date >= dateadd(day, -365, CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
                         GROUP BY o.treatment",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -422,12 +411,12 @@ drugEfficacyAnalysis <- function(connectionDetails,
         HbA1cAfTx <- querySql(conn, sqlOne)
         remove(sqlOne)
         HbA1cBefTx$TcPatients <- NA
-        HbA1cBefTx$TcPatients[1] <- numPidOne
-        HbA1cBefTx$TcPatients[2] <- numPidTwo
+        HbA1cBefTx$TcPatients[1] <- nrow(subset(studyPop,treatment==0))
+        HbA1cBefTx$TcPatients[2] <- nrow(subset(studyPop,treatment==1))
         HbA1cBefTx$Index <- c("Before")
         HbA1cAfTx$TcPatients <- NA
-        HbA1cAfTx$TcPatients[1] <- numPidOne
-        HbA1cAfTx$TcPatients[2] <- numPidTwo
+        HbA1cAfTx$TcPatients[1] <- nrow(subset(studyPop,treatment==0))
+        HbA1cAfTx$TcPatients[2] <- nrow(subset(studyPop,treatment==1))
         HbA1cAfTx$Index <- c("After")
         unMatchedHbA1cMeanSd <- rbind(HbA1cBefTx,HbA1cAfTx)
         unMatchedHbA1cMeanSd$class <- c("unMatched")
@@ -474,12 +463,12 @@ drugEfficacyAnalysis <- function(connectionDetails,
         HbA1cAfTx <- querySql(conn, sqlOne)
         remove(sqlOne)
         HbA1cBefTx$TcPatients <- NA
-        HbA1cBefTx$TcPatients[1] <- numPidOne
-        HbA1cBefTx$TcPatients[2] <- numPidTwo
+        HbA1cBefTx$TcPatients[1] <- nrow(subset(matchedPop,treatment==0))
+        HbA1cBefTx$TcPatients[2] <- nrow(subset(matchedPop,treatment==1))
         HbA1cBefTx$Index <- c("Before")
         HbA1cAfTx$TcPatients <- NA
-        HbA1cAfTx$TcPatients[1] <- numPidOne
-        HbA1cAfTx$TcPatients[2] <- numPidTwo
+        HbA1cAfTx$TcPatients[1] <- nrow(subset(matchedPop,treatment==0))
+        HbA1cAfTx$TcPatients[2] <- nrow(subset(matchedPop,treatment==1))
         HbA1cAfTx$Index <- c("After")
         matchedHbA1cMeanSd <- rbind(HbA1cBefTx,HbA1cAfTx)
         matchedHbA1cMeanSd$class <- c("matched")

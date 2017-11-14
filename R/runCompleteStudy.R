@@ -49,8 +49,9 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
   #5 - KD
   #6 - ED
   outComeName <- c("HbA1c","MI","KD","ED")
+  drugComp <- list()
   for(i in 1:length(outComeId)){
-    runStudy(connectionDetails = connectionDetails,
+    drugComp[[i]] <- runStudy(connectionDetails = connectionDetails,
              cdmDatabaseSchema = cdmDatabaseSchema,
              resultsDatabaseSchema = resultsDatabaseSchema,
              cdmVersion = cdmVersion,
@@ -60,4 +61,12 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
              results_path = results_path)
     print(paste("*************** Study Completed for outcome - ",outComeName[i]," *******************",sep=""))
   }
+  resultBundle <- data.frame()
+  for(i in 1:length(drugComp)){
+    dat <- drugComp[[i]]
+    resultBundle <- rbind(resultBundle,dat)
+    remove(dat)
+  }
+  write.csv(resultBundle, file = paste(results_path,"resultBundel.csv",sep=""))
+  remove(resultBundle)
 }
