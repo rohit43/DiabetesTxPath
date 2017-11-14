@@ -91,8 +91,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
   #------ New Change ------
   #Do not ship/share this table at any cost. You should delete this once the study completes.
   saveCohortMethodData(cohortMethodData, paste(treatment,"_",comparator,"_",outCome,sep=""))
-
-
   studyPop <- createStudyPopulation(cohortMethodData = cohortMethodData,
                                     outcomeId = outCome,
                                     firstExposureOnly = FALSE,
@@ -104,8 +102,9 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                     addExposureDaysToStart = FALSE,
                                     riskWindowEnd = 0,
                                     addExposureDaysToEnd = TRUE)
-  tStudyPid <- nrow(studyPop)
 
+#-------------------
+  tStudyPid <- nrow(studyPop)
   conn <- DatabaseConnector::connect(connectionDetails)
   insertTable(conn,
               "ohdsiT2DstudyPop",
@@ -372,124 +371,120 @@ drugEfficacyAnalysis <- function(connectionDetails,
       #------ Getting mean HbA1c before matching for all the patients
       if(outCome==3){
         conn <- DatabaseConnector::connect(connectionDetails)
-        studyPopHba1c <- subset(studyPop,outcomeCount>0)
-        studyPopHba1c$cohortStartDate <- format(studyPopHba1c$cohortStartDate,"%d-%b-%Y")
-        studyPopHba1c$cohortStartDate <- as.character(studyPopHba1c$cohortStartDate)
-        #studyPopHba1c$cohortStartDate <- toupper(studyPopHba1c$cohortStartDate)
-        studyPopHba1cTreatment <- subset(studyPopHba1c, treatment==1)
-        studyPopHba1cComparator <- subset(studyPopHba1c, treatment==0)
+        #Get total number of T and C patients
+        sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",sep="")
+        sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
+        sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+        numPidOne <- as.numeric(as.character((querySql(conn, sql))))
+        sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 2",sep="")
+        sql <- SqlRender::renderSql(sql,results_database_schema = resultsDatabaseSchema)$sql
+        sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+        numPidTwo <- as.numeric(as.character((querySql(conn, sql))))
+        remove(sql)
         insertTable(conn,
                     "ohdsiT2DstudyPop",
-                    studyPopHba1cTreatment,
+                    studyPop,
                     dropTableIfExists = TRUE,
                     createTable = TRUE,
                     tempTable = TRUE,
                     oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
+        sqlOne <- paste("SELECT o.treatment,
+                        count(DISTINCT m.person_id) AS patients,
+                        count(*)
+                        AS records,
+                        AVG(m.VALUE_AS_NUMBER) AS AVG,
+                        STDEV(m.VALUE_AS_NUMBER) AS STD
+                        FROM @cdmDatabaseSchema.MEASUREMENT m
+                        JOIN #ohdsiT2DstudyPop o
+                        ON m.person_id = o.SUBJECTID
+                        WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971)
+                        AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                        AND m.measurement_date >= dateadd(day, -365, CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                        GROUP BY o.treatment",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
-        sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
-        sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
-        HbA1cBefTx_treatment <- querySql(conn, sqlOne)
-        HbA1cAftTx_treatment <- querySql(conn, sqlTwo)
-        remove(sqlOne, sqlTwo)
-
-        #Getting for the comparator
-        insertTable(conn,
-                    "ohdsiT2DstudyPop",
-                    studyPopHba1cComparator,
-                    dropTableIfExists = TRUE,
-                    createTable = TRUE,
-                    tempTable = TRUE,
-                    oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
+        HbA1cBefTx <- querySql(conn, sqlOne)
+        remove(sqlOne)
+        sqlOne <- paste("SELECT o.treatment,
+                        count(DISTINCT m.person_id) AS patients,
+                        count(*)
+                        AS records,
+                        AVG(m.VALUE_AS_NUMBER) AS AVG,
+                        STDEV(m.VALUE_AS_NUMBER) AS STD
+                        FROM @cdmDatabaseSchema.MEASUREMENT m
+                        JOIN #ohdsiT2DstudyPop o
+                        ON m.person_id = o.SUBJECTID
+                        WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971)
+                        AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                        GROUP BY o.treatment",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
-        sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
-        sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
-        HbA1cBefTx_comparator <- querySql(conn, sqlOne)
-        HbA1cAftTx_comparator <- querySql(conn, sqlTwo)
-        remove(sqlOne, sqlTwo)
-        if(nrow(HbA1cBefTx_treatment)!=0&nrow(HbA1cAftTx_treatment)!=0&nrow(HbA1cBefTx_comparator)!=0&nrow(HbA1cAftTx_comparator)!=0){
-          meanTreatBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_treatment$AVG)))
-          sdTreatBefIndex <- as.numeric(as.character(HbA1cBefTx_treatment$STD))
-          meanTreatAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_treatment$AVG)))
-          sdTreatAftIndex <- as.numeric(as.character(HbA1cAftTx_treatment$STD))
-          meanCompBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_comparator$AVG)))
-          sdCompBefIndex <- as.numeric(as.character(HbA1cBefTx_comparator$STD))
-          meanCompAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_comparator$AVG)))
-          sdCompAftIndex <- as.numeric(as.character(HbA1cAftTx_comparator$STD))
-          unMatchedHbA1cMeanSd <- data.frame(cbind(meanTreatBefIndex,sdTreatBefIndex,meanTreatAftIndex,sdTreatAftIndex,meanCompBefIndex,sdCompBefIndex,meanCompAftIndex,sdCompAftIndex))
-          colnames(unMatchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
-          remove(HbA1cAftTx_comparator,HbA1cAftTx_treatment,HbA1cBefTx_comparator,HbA1cBefTx_treatment,studyPopHba1c,studyPopHba1cComparator,studyPopHba1cTreatment)
-        } else
-        {
-          unMatchedHbA1cMeanSd <- data.frame(NA,NA,NA,NA,NA,NA,NA,NA)
-          colnames(unMatchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
-        }
-
+        HbA1cAfTx <- querySql(conn, sqlOne)
+        remove(sqlOne)
+        HbA1cBefTx$TcPatients <- NA
+        HbA1cBefTx$TcPatients[1] <- numPidOne
+        HbA1cBefTx$TcPatients[2] <- numPidTwo
+        HbA1cBefTx$Index <- c("Before")
+        HbA1cAfTx$TcPatients <- NA
+        HbA1cAfTx$TcPatients[1] <- numPidOne
+        HbA1cAfTx$TcPatients[2] <- numPidTwo
+        HbA1cAfTx$Index <- c("After")
+        unMatchedHbA1cMeanSd <- rbind(HbA1cBefTx,HbA1cAfTx)
+        unMatchedHbA1cMeanSd$class <- c("unMatched")
+        remove(HbA1cBefTx,HbA1cAfTx)
         #Matched Cohort
-        studyPopHba1c <- subset(matchedPop,outcomeCount>0)
-        studyPopHba1c$cohortStartDate <- format(studyPopHba1c$cohortStartDate,"%d-%b-%Y")
-        studyPopHba1c$cohortStartDate <- as.character(studyPopHba1c$cohortStartDate)
-        #studyPopHba1c$cohortStartDate <- toupper(studyPopHba1c$cohortStartDate)
-        studyPopHba1cTreatment <- subset(studyPopHba1c, treatment==1)
-        studyPopHba1cComparator <- subset(studyPopHba1c, treatment==0)
         insertTable(conn,
                     "ohdsiT2DstudyPop",
-                    studyPopHba1cTreatment,
+                    matchedPop,
                     dropTableIfExists = TRUE,
                     createTable = TRUE,
                     tempTable = TRUE,
                     oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
+        sqlOne <- paste("SELECT o.treatment,
+                        count(DISTINCT m.person_id) AS patients,
+                        count(*)
+                        AS records,
+                        AVG(m.VALUE_AS_NUMBER) AS AVG,
+                        STDEV(m.VALUE_AS_NUMBER) AS STD
+                        FROM @cdmDatabaseSchema.MEASUREMENT m
+                        JOIN #ohdsiT2DstudyPop o
+                        ON m.person_id = o.SUBJECTID
+                        WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971)
+                        AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                        AND m.measurement_date >= dateadd(day, -365, CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                        GROUP BY o.treatment",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
-        sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
-        sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
-        HbA1cBefTx_treatment <- querySql(conn, sqlOne)
-        HbA1cAftTx_treatment <- querySql(conn, sqlTwo)
-        remove(sqlOne, sqlTwo)
-
-        #Getting for the comparator
-        insertTable(conn,
-                    "ohdsiT2DstudyPop",
-                    studyPopHba1cComparator,
-                    dropTableIfExists = TRUE,
-                    createTable = TRUE,
-                    tempTable = TRUE,
-                    oracleTempSchema = NULL)
-        sqlOne <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE <  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
+        HbA1cBefTx <- querySql(conn, sqlOne)
+        remove(sqlOne)
+        sqlOne <- paste("SELECT o.treatment,
+                        count(DISTINCT m.person_id) AS patients,
+                        count(*)
+                        AS records,
+                        AVG(m.VALUE_AS_NUMBER) AS AVG,
+                        STDEV(m.VALUE_AS_NUMBER) AS STD
+                        FROM @cdmDatabaseSchema.MEASUREMENT m
+                        JOIN #ohdsiT2DstudyPop o
+                        ON m.person_id = o.SUBJECTID
+                        WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971)
+                        AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                        GROUP BY o.treatment",sep="")
         sqlOne <- SqlRender::renderSql(sqlOne,cdmDatabaseSchema = cdmDatabaseSchema)$sql
         sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
-        sqlTwo <- paste("SELECT AVG(m.VALUE_AS_NUMBER) AS AVG, STDEV(m.VALUE_AS_NUMBER) AS STD FROM @cdmDatabaseSchema.MEASUREMENT m JOIN #ohdsiT2DstudyPop o ON m.person_id = o.SUBJECTID WHERE m.measurement_concept_id IN (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971) AND m.MEASUREMENT_DATE >  CAST(o.COHORTSTARTDATE AS DATE)",sep="")
-        sqlTwo <- SqlRender::renderSql(sqlTwo,cdmDatabaseSchema = cdmDatabaseSchema)$sql
-        sqlTwo <- SqlRender::translateSql(sqlTwo, targetDialect = connectionDetails$dbms)$sql
-        HbA1cBefTx_comparator <- querySql(conn, sqlOne)
-        HbA1cAftTx_comparator <- querySql(conn, sqlTwo)
-        remove(sqlOne, sqlTwo)
-        if(nrow(HbA1cBefTx_treatment)!=0&nrow(HbA1cAftTx_treatment)!=0&nrow(HbA1cBefTx_comparator)!=0&nrow(HbA1cAftTx_comparator)!=0){
-          meanTreatBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_treatment$AVG)))
-          sdTreatBefIndex <- as.numeric(as.character(HbA1cBefTx_treatment$STD))
-          meanTreatAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_treatment$AVG)))
-          sdTreatAftIndex <- as.numeric(as.character(HbA1cAftTx_treatment$STD))
-          meanCompBefIndex <- as.numeric(as.character(mean(HbA1cBefTx_comparator$AVG)))
-          sdCompBefIndex <- as.numeric(as.character(HbA1cBefTx_comparator$STD))S
-          meanCompAftIndex <- as.numeric(as.character(mean(HbA1cAftTx_comparator$AVG)))
-          sdCompAftIndex <- as.numeric(as.character(HbA1cAftTx_comparator$STD))
-          matchedHbA1cMeanSd <- data.frame(cbind(meanTreatBefIndex,sdTreatBefIndex,meanTreatAftIndex,sdTreatAftIndex,meanCompBefIndex,sdCompBefIndex,meanCompAftIndex,sdCompAftIndex))
-          colnames(matchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
-          remove(HbA1cAftTx_comparator,HbA1cAftTx_treatment,HbA1cBefTx_comparator,HbA1cBefTx_treatment,studyPopHba1c,studyPopHba1cComparator,studyPopHba1cTreatment)
-        } else
-        {
-          matchedHbA1cMeanSd <- data.frame(NA,NA,NA,NA,NA,NA,NA,NA)
-          colnames(matchedHbA1cMeanSd) <- c("meanTreatmentBefIndex","sdTreatmentBefIndex","meanTreatmentAftIndex","sdTreatmentAftIndex","meanComparatorBefIndex","sdComparatorBefIndex","meanComparatorAftIndex","sdComparatorAftIndex")
-        }
+        HbA1cAfTx <- querySql(conn, sqlOne)
+        remove(sqlOne)
+        HbA1cBefTx$TcPatients <- NA
+        HbA1cBefTx$TcPatients[1] <- numPidOne
+        HbA1cBefTx$TcPatients[2] <- numPidTwo
+        HbA1cBefTx$Index <- c("Before")
+        HbA1cAfTx$TcPatients <- NA
+        HbA1cAfTx$TcPatients[1] <- numPidOne
+        HbA1cAfTx$TcPatients[2] <- numPidTwo
+        HbA1cAfTx$Index <- c("After")
+        matchedHbA1cMeanSd <- rbind(HbA1cBefTx,HbA1cAfTx)
+        matchedHbA1cMeanSd$class <- c("matched")
+        remove(HbA1cBefTx,HbA1cAfTx)
         hbA1cStat <- rbind(unMatchedHbA1cMeanSd,matchedHbA1cMeanSd)
-        rownames(hbA1cStat) <- c("unMatched","matched")
         remove(unMatchedHbA1cMeanSd,matchedHbA1cMeanSd)
         results <- list(psAUC,
                         psScoreBeforeMatching,
