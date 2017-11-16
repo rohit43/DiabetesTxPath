@@ -44,12 +44,12 @@ buildCohort <- function(connectionDetails,
                         treatment,
                         comparator,
                         outComeId) {
-  # Since all the outcomes remains same same for every treatment and comparator cohort, therefore
-  # fixing there value as shown below:
-  outComeOne <- c("HbA1c.sql")  #cohortId = 3
-  outComeTwo <- c("myocardialInfraction.sql")  #cohortId = 4
-  outComeThree <- c("kidneyDisorder.sql")  #cohortId = 5
-  outComeFour <- c("eyesDisorder.sql")  #cohortId = 6
+  # Will build the cohorts depending on the outcome of interest
+  outComeOne <- c("HbA1c7Good.sql")  #cohortId = 3
+  outComeTwo <- c("HbA1c8Moderate.sql")
+  outComeThree <- c("myocardialInfraction.sql")  #cohortId = 4
+  outComeFour <- c("kidneyDisorder.sql")  #cohortId = 5
+  outComeFive <- c("eyeDisorder.sql")  #cohortId = 6
   targetDatabaseSchema <- resultsDatabaseSchema
   targetCohortTable <- "ohdsi_t2dpathway"
   conn <- DatabaseConnector::connect(connectionDetails)
@@ -59,11 +59,9 @@ buildCohort <- function(connectionDetails,
                               target_cohort_table = targetCohortTable)$sql
   sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
   DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
-
   # Constructing treatment cohort - Treatment Cohort Id will always be 1
   sql <- readSql(system.file(paste("sql/sql_server/", treatment, sep = ""),
                              package = "DiabetesTxPath"))
-
   sql <- SqlRender::renderSql(sql,
                               cdm_database_schema = cdmDatabaseSchema,
                               target_database_schema = targetDatabaseSchema,
@@ -71,7 +69,6 @@ buildCohort <- function(connectionDetails,
                               target_cohort_id = 1)$sql
   sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
   DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
-
   # Constructing comparator cohort - Comparator Cohort ID will always be 2
   sql <- readSql(system.file(paste("sql/sql_server/", comparator, sep = ""),
                              package = "DiabetesTxPath"))
@@ -82,9 +79,9 @@ buildCohort <- function(connectionDetails,
                               target_cohort_id = 2)$sql
   sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
   DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
-
   # Constructing outcome HbA1c cohort - Outcome cohort HbA1c will always have cohort id as 3
   if (outComeId == 3) {
+    # will construct the outcome cohort for HbA1c7Good
     sql <- readSql(system.file(paste("sql/sql_server/", outComeOne, sep = ""),
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
@@ -95,8 +92,7 @@ buildCohort <- function(connectionDetails,
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
     DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
   } else if (outComeId == 4) {
-    # Constructing Myocardial Infraction outcome cohort - Outcome cohort MI will always have cohort id as
-    # 4
+    # will construct the outcome cohort for HbA1c8Moderate
     sql <- readSql(system.file(paste("sql/sql_server/", outComeTwo, sep = ""),
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
@@ -107,7 +103,7 @@ buildCohort <- function(connectionDetails,
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
     DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
   } else if (outComeId == 5) {
-    # Constructing Kidney disorder outcome cohort - Outcome cohort KD will always have cohort id as 5
+    # will construct the outcome cohort for Myocardial Infraction
     sql <- readSql(system.file(paste("sql/sql_server/", outComeThree, sep = ""),
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
@@ -118,8 +114,7 @@ buildCohort <- function(connectionDetails,
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
     DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
   } else if (outComeId == 6) {
-    # Constructing Eyes related disorder outcome cohort - Outcome cohort ED will always have cohort id as
-    # 6
+    # will construct the outcome cohort for kidney related disorders
     sql <- readSql(system.file(paste("sql/sql_server/", outComeFour, sep = ""),
                                package = "DiabetesTxPath"))
     sql <- SqlRender::renderSql(sql,
@@ -129,7 +124,18 @@ buildCohort <- function(connectionDetails,
                                 target_cohort_id = 6)$sql
     sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
     DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
+  } else if (outComeId == 7) {
+    # will construct the outcome cohort for eye related disorders
+    sql <- readSql(system.file(paste("sql/sql_server/", outComeFour, sep = ""),
+                               package = "DiabetesTxPath"))
+    sql <- SqlRender::renderSql(sql,
+                                cdm_database_schema = cdmDatabaseSchema,
+                                target_database_schema = targetDatabaseSchema,
+                                target_cohort_table = targetCohortTable,
+                                target_cohort_id = 7)$sql
+    sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+    DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
   } else {
-    print(paste("Please enter correct OutComeId. It should be either 3, 4, 5 or 6", sep = ""))
+    print(paste("Please enter correct OutComeId. It should be either 3, 4, 5, 6 or 7", sep = ""))
   }
 }

@@ -21,52 +21,52 @@
 # @author Stanford University Center for Biomedical Informatics - Shah Lab
 # @author Rohit Vashisht
 #
-#' @title runStudy
+#' @title
+#' runStudy
 #'
-#' @author Rohit Vashisht
+#' @author
+#' Rohit Vashisht
 #'
-#' @details This function can be used to perform the DiabetesTxPathway analysis
-#' end-to-end. Just supply the details and leave it running overnight. Please note
-#' the function will perform analysis if there are atleast 100 patients for each
-#' of the drug group considered in the study.
+#' @details
+#' This function can be used to perform the DiabetesTxPathway analysis end-to-end. Just supply the
+#' details and leave it running overnight. Please note the function will perform analysis if there are
+#' atleast 100 patients for each of the drug group considered in the study.
 #'
-#' @param connectionDetails The connection details of the database.
-#' @param cdmDatabaseSchema The cdm database schema
-#' @param resultsDatabaseSchema The results datavase schema
-#' @param cdmVersion The cdm version, should be 5 only
-#' @param numThread Number of threads to be used.
+#' @param connectionDetails       The connection details of the database.
+#' @param cdmDatabaseSchema       The cdm database schema
+#' @param resultsDatabaseSchema   The results datavase schema
+#' @param cdmVersion              The cdm version, should be 5 only
+#' @param numThread               Number of threads to be used.
 #'
 #' @export
 runCompleteStudy <- function(connectionDetails = connectionDetails,
                              cdmDatabaseSchema = cdmDatabaseSchema,
                              resultsDatabaseSchema = resultsDatabaseSchema,
                              cdmVersion = cdmVersion,
-                             numThread = numThread,
-                             results_path = results_path){
-  outComeId <- c(3,4,5,6)
-  #3 - HbA1c
-  #4 - MI
-  #5 - KD
-  #6 - ED
-  outComeName <- c("HbA1c","MI","KD","ED")
+                             results_path = results_path) {
+  outComeId <- c(3, 4, 5, 6, 7)
+  # 3 - HbA1c7Good 4 - HbA1c8Moderate 5 - MI 6 - KD 7 - ED
+  outComeName <- c("HbA1c7Good", "HbA1c8Moderate", "MI", "KD", "ED")
   drugComp <- list()
-  for(i in 1:length(outComeId)){
+  for (i in 1:length(outComeId)) {
     drugComp[[i]] <- runStudy(connectionDetails = connectionDetails,
-             cdmDatabaseSchema = cdmDatabaseSchema,
-             resultsDatabaseSchema = resultsDatabaseSchema,
-             cdmVersion = cdmVersion,
-             outComeId = outComeId[i],
-             outComeName = outComeName[i],
-             numThread = numThread,
-             results_path = results_path)
-    print(paste("*************** Study Completed for outcome - ",outComeName[i]," *******************",sep=""))
+                              cdmDatabaseSchema = cdmDatabaseSchema,
+                              resultsDatabaseSchema = resultsDatabaseSchema,
+                              cdmVersion = cdmVersion,
+                              outComeId = outComeId[i],
+                              outComeName = outComeName[i],
+                              results_path = results_path)
+    print(paste("*************** Study Completed for outcome - ",
+                outComeName[i],
+                " *******************",
+                sep = ""))
   }
   resultBundle <- data.frame()
-  for(i in 1:length(drugComp)){
+  for (i in 1:length(drugComp)) {
     dat <- drugComp[[i]]
-    resultBundle <- rbind(resultBundle,dat)
+    resultBundle <- rbind(resultBundle, dat)
     remove(dat)
   }
-  write.csv(resultBundle, file = paste(results_path,"resultBundel.csv",sep=""))
+  write.csv(resultBundle, file = paste(results_path, "resultBundel.csv", sep = ""))
   remove(resultBundle)
 }

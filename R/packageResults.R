@@ -11,8 +11,8 @@
 #' @param cdmDatabaseSchema   Schema name where your patient-level data in OMOP CDM format resides.
 #'                            Note that for SQL Server, this should include both the database and
 #'                            schema name, for example 'cdm_data.dbo'.
-#' @param workFolder        Name of local folder to place results; make sure to use forward slashes subfolder export will be created there
-#'                            (/)
+#' @param workFolder          Name of local folder to place results; make sure to use forward slashes
+#'                            subfolder export will be created there (/)
 #'
 #' @export
 packageResults <- function(connectionDetails,
