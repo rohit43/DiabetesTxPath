@@ -13,7 +13,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+#
+# @author Stanford University Center for Biomedical Informatics - Nigam Shah Lab
+# @author Rohit Vashisht
+#
+#' @title
+#' buildCohort
+#'
+#' @author
+#' Rohit Vashisht
+#'
+#
 #' Create the exposure and outcome cohorts
 #'
 #' @details
@@ -29,12 +39,8 @@
 #'                                have write priviliges in this schema. Note that for SQL Server, this
 #'                                should include both the database and schema name, for example
 #'                                'cdm_data.dbo'.
-#' @param treatment               The name of the of treatment cohort that you want to creat, for
-#'                                example treatment = c("BigToBig.sql) will creat treatment cohort of
-#'                                patients who start with Biguanide and remain on it.
-#' @param comparator              The name of the comparator cohort that you want to create, for
-#'                                example comparator = c("SulfToSulf.sql) will create comparator cohort
-#'                                with respect to treatment cohort above.
+#' @param treatment               The name of the of treatment cohort that you want to create.
+#' @param comparator              The name of the comparator cohort that you want to create.
 #' @param outComeId               The outcome Id of interest.
 #'
 #' @export

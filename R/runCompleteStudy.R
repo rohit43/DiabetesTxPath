@@ -22,7 +22,7 @@
 # @author Rohit Vashisht
 #
 #' @title
-#' runStudy
+#' runCompleteStudy
 #'
 #' @author
 #' Rohit Vashisht
@@ -30,13 +30,12 @@
 #' @details
 #' This function can be used to perform the DiabetesTxPathway analysis end-to-end. Just supply the
 #' details and leave it running overnight. Please note the function will perform analysis if there are
-#' atleast 100 patients for each of the drug group considered in the study.
+#' atleast 250 patients for each of the drug group considered in the study.
 #'
 #' @param connectionDetails       The connection details of the database.
 #' @param cdmDatabaseSchema       The cdm database schema
 #' @param resultsDatabaseSchema   The results datavase schema
 #' @param cdmVersion              The cdm version, should be 5 only
-#' @param numThread               Number of threads to be used.
 #'
 #' @export
 runCompleteStudy <- function(connectionDetails = connectionDetails,
