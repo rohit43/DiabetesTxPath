@@ -122,7 +122,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
   # saving the cohortMethod data. Plese note - Please do not sahre this table while shiping the results
   # from one site to other.
   saveCohortMethodData(cohortMethodData,
-                       paste(results_path,"/deleteMeBeforeSharing/",treatment, "_", comparator, "_", outCome, sep = ""))
+                       paste(results_path,"deleteMeBeforeSharing/",treatment, "_", comparator, "_", outCome, sep = ""))
   studyPop <- createStudyPopulation(cohortMethodData = cohortMethodData,
                                     outcomeId = outCome,
                                     firstExposureOnly = FALSE,
@@ -144,7 +144,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
   } else {
     print(paste("Computing propensity scores - This might take some time ...", sep = ""))
     psScore <- createPs(cohortMethodData = cohortMethodData, population = studyPop)
-    saveRDS(psScore, file = paste(results_path,"/deleteMeBeforeSharing/",treatment, "_", comparator, "_", outCome,"_psScores.RDS",sep = ""))
+    saveRDS(psScore, file = paste(results_path,"deleteMeBeforeSharing/",treatment, "_", comparator, "_", outCome,"_psScores.RDS",sep = ""))
     print(paste("Done computing propensity scores ..."))
     psAUC <- computePsAuc(psScore, confidenceIntervals = TRUE)
     psScoreBeforeMatching <- plotPs(psScore,
