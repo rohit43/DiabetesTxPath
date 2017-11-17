@@ -50,8 +50,7 @@ results_path <- "path to results folder" #where you want the results to be saved
 #For example results_path <- "/Users/rvashisht/Desktop/StudyResults/" will save the
 #study results in StudyResults folder in Desktop.
 #----*********-------
-cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5
-numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
+cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5 
 ```
 
 ## Step-5
