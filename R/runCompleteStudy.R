@@ -44,6 +44,12 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
                              resultsDatabaseSchema = resultsDatabaseSchema,
                              cdmVersion = cdmVersion,
                              results_path = results_path) {
+  #Creating an intermediate directory to store results that you might
+  #need to re-run the study in case it crashes. Please make sure that
+  #you don't share this subdirectory. We are therefore naming it as
+  #deleteMeBeforeSharing
+  unlink(paste(results_path,"deleteMeBeforeSharing",sep=""), recursive = TRUE)
+  dir.create(file.path(paste(results_path,"deleteMeBeforeSharing",sep="")))
   outComeId <- c(3, 4, 5, 6, 7)
   # 3 - HbA1c7Good 4 - HbA1c8Moderate 5 - MI 6 - KD 7 - ED
   outComeName <- c("HbA1c7Good", "HbA1c8Moderate", "MI", "KD", "ED")

@@ -7,7 +7,7 @@ CREATE TABLE #Codesets (
 INSERT INTO #Codesets (codeset_id, concept_id)
 SELECT 0 as codeset_id, c.concept_id FROM (select distinct I.concept_id FROM
 ( 
-  select concept_id from @cdm_database_schema.CONCEPT where concept_id in (3004410,3007263,3003309,3005673,40762352,40758583,3034639)and invalid_reason is null
+  select concept_id from @cdm_database_schema.CONCEPT where concept_id in (45766075,4178129,4267568,4011131,312327,44782769,44782712,45766115,434376,45766150,438438,4243372,4108669,4151046,4275436,438170,45771322,438447,441579,436706,4324413,4051874,4303359,4147223,4145721,4119944,4119456,4119945,4119946,4121466,4124685,4270024,319039,4119457,4119943,4121464,4121465,4124684,4119948,4126801,4296653,46270162,46270163,43020460,43020461,45766076,46270159,46270160,45766116,45766151,46274044,46270161,46273495,46270158,46270164,444406,4119947,438172,4215259,4173632,4323202,4329847,4170094,4154704,4200113,4138833,319038,4030582,4206867,4207921,4209541,4124686,4108217,4108677,4108218,45766241,45766114,45766113,45773170,439693)and invalid_reason is null
 
 ) I
 ) C;
@@ -22,17 +22,17 @@ FROM
   select P.person_id, P.start_date, P.end_date, row_number() OVER (PARTITION BY person_id ORDER BY start_date ASC) ordinal, P.visit_occurrence_id
   FROM 
   (
-  -- Begin Measurement Criteria
-select C.person_id, C.measurement_id as event_id, C.measurement_date as start_date, DATEADD(d,1,C.measurement_date) as END_DATE, C.measurement_concept_id as TARGET_CONCEPT_ID, C.visit_occurrence_id
-from 
+  -- Begin Condition Occurrence Criteria
+SELECT C.person_id, C.condition_occurrence_id as event_id, C.condition_start_date as start_date, COALESCE(C.condition_end_date, DATEADD(day,1,C.condition_start_date)) as end_date, C.CONDITION_CONCEPT_ID as TARGET_CONCEPT_ID, C.visit_occurrence_id
+FROM 
 (
-  select m.*, row_number() over (PARTITION BY m.person_id ORDER BY m.measurement_date, m.measurement_id) as ordinal
-  FROM @cdm_database_schema.MEASUREMENT m
-where m.measurement_concept_id in (SELECT concept_id from  #Codesets where codeset_id = 0)
+  SELECT co.*, row_number() over (PARTITION BY co.person_id ORDER BY co.condition_start_date, co.condition_occurrence_id) as ordinal
+  FROM @cdm_database_schema.CONDITION_OCCURRENCE co
+  where co.condition_concept_id in (SELECT concept_id from  #Codesets where codeset_id = 0)
 ) C
 
-WHERE C.value_as_number <= 7.5000
--- End Measurement Criteria
+
+-- End Condition Occurrence Criteria
 
   ) P
 ) P

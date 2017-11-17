@@ -122,7 +122,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
   # saving the cohortMethod data. Plese note - Please do not sahre this table while shiping the results
   # from one site to other.
   saveCohortMethodData(cohortMethodData,
-                       paste(results_path, treatment, "_", comparator, "_", outCome, sep = ""))
+                       paste(results_path,"/deleteMeBeforeSharing/",treatment, "_", comparator, "_", outCome, sep = ""))
   studyPop <- createStudyPopulation(cohortMethodData = cohortMethodData,
                                     outcomeId = outCome,
                                     firstExposureOnly = FALSE,
@@ -144,7 +144,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
   } else {
     print(paste("Computing propensity scores - This might take some time ...", sep = ""))
     psScore <- createPs(cohortMethodData = cohortMethodData, population = studyPop)
-    # saveRDS -- for psScore
+    saveRDS(psScore, file = paste(results_path,"/deleteMeBeforeSharing/",treatment, "_", comparator, "_", outCome,"_psScores.RDS",sep = ""))
     print(paste("Done computing propensity scores ..."))
     psAUC <- computePsAuc(psScore, confidenceIntervals = TRUE)
     psScoreBeforeMatching <- plotPs(psScore,
@@ -152,7 +152,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                     treatmentLabel = treatment,
                                     comparatorLabel = comparator)
     matchedPop <- matchOnPs(psScore,
-                            caliper = 0.2,
+                            caliper = 0.25,
                             caliperScale = "standardized logit",
                             maxRatio = 1)
     psScoreAfterMatching <- plotPs(matchedPop,
@@ -169,8 +169,7 @@ drugEfficacyAnalysis <- function(connectionDetails,
                                 cohortMethodData = cohortMethodData,
                                 modelType = "cox",
                                 stratified = TRUE,
-                                useCovariates = TRUE)
-    fullOutcomeModel <- getOutcomeModel(modelFit, cohortMethodData)
+                                useCovariates = FALSE)
     kmPlotWithoutCI <- plotKaplanMeier(matchedPop,
                                        includeZero = FALSE,
                                        confidenceIntervals = FALSE,
@@ -499,7 +498,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
                       genderBeforeMatching,
                       genderAfterMatching,
                       hbA1cStat,
-                      fullOutcomeModel,
                       topCovariateBalance)
     } else if (outCome == 4) {
       conn <- DatabaseConnector::connect(connectionDetails)
@@ -650,7 +648,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
                       genderBeforeMatching,
                       genderAfterMatching,
                       hbA1cStat,
-                      fullOutcomeModel,
                       topCovariateBalance)
     } else if (outCome == 5) {
       # unMatched
@@ -691,7 +688,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
                       genderBeforeMatching,
                       genderAfterMatching,
                       MiStat,
-                      fullOutcomeModel,
                       topCovariateBalance)
     } else if (outCome == 6) {
       studyPopKDTreatment <- subset(studyPop, treatment == 1)
@@ -731,7 +727,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
                       genderBeforeMatching,
                       genderAfterMatching,
                       KDStat,
-                      fullOutcomeModel,
                       topCovariateBalance)
     } else if (outCome == 7) {
       studyPopEDTreatment <- subset(studyPop, treatment == 1)
@@ -771,7 +766,6 @@ drugEfficacyAnalysis <- function(connectionDetails,
                       genderBeforeMatching,
                       genderAfterMatching,
                       EDStat,
-                      fullOutcomeModel,
                       topCovariateBalance)
     }
   }

@@ -140,7 +140,7 @@ runStudy <- function(connectionDetails = connectionDetails,
         plot(results[[2]])  #Ps score before matching.
         plot(results[[3]])  #Ps score after matching.
         plot(results[[5]])  #Cov balance.
-        plot(results[[15]])
+        plot(results[[14]]) #Cov balance top-20
         plot(results[[4]])  #Attr diagram.
         plot(results[[7]])  #Km without CI
         plot(results[[8]])  #Km with CI
@@ -185,15 +185,6 @@ runStudy <- function(connectionDetails = connectionDetails,
                                               sep = ""))
         write.csv(results[[13]], file = paste(results_path,
                                               "stat-",
-                                              treatment,
-                                              "-and-",
-                                              comparator,
-                                              "_",
-                                              outComeName,
-                                              ".csv",
-                                              sep = ""))
-        write.csv(results[[14]], file = paste(results_path,
-                                              "fullModel-",
                                               treatment,
                                               "-and-",
                                               comparator,

@@ -274,7 +274,7 @@ from
 where de.drug_concept_id in (SELECT concept_id from  #Codesets where codeset_id = 6)
 ) C
 
-
+WHERE C.ordinal = 1
 -- End Drug Exposure Criteria
 
 ) C on C.person_id = I.person_id and C.start_date >= I.start_date and C.START_DATE <= I.op_end_date
