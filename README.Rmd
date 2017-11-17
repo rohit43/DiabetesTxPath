@@ -44,7 +44,15 @@ Provide database schema name and other details as follows.
 cdmDatabaseSchema <- "nameOfYourCdmSchema"
 resultsDatabaseSchema <- "nameOfResultsSchema"
 targetDatabaseSchema <- "nameOfResultsSchema"
+#----**********------
+#Make sure to add / at the end of results_path in case you don't have that otherwise no folder 
+#will be created and the study might crash.
+
 results_path <- "path to results folder" #where you want the results to be saved.
+
+#For example results_path <- "/Users/rvashisht/Desktop/StudyResults/" will save the
+study results in StudyResults folder in Desktop.
+#----*********-------
 cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5
 numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
 ```
@@ -57,9 +65,13 @@ runCompleteStudy(connectionDetails = connectionDetails,
                  cdmDatabaseSchema = cdmDatabaseSchema,
                  resultsDatabaseSchema = resultsDatabaseSchema,
                  cdmVersion = cdmVersion,
-                 numThread = numThread,
                  results_path = results_path)
 ```
+## Important
+The runCompleteStudy function will create a folder *deleteMeBeforeSharing*.
+Please do not share this folder. Make sure to delete this folder from your 
+results folder before sharing rest of the results.
+
 
 Package the results as follows:
 ```r
