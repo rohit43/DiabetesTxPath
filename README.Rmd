@@ -23,7 +23,6 @@ library("OhdsiSharing")
 library("SqlRender")
 library("DatabaseConnector")
 library("CohortMethod")
-library("gridExtra")
 library("DiabetesTxPath")
 ```
 ## Step-3
@@ -47,11 +46,9 @@ targetDatabaseSchema <- "nameOfResultsSchema"
 #----**********------
 #Make sure to add / at the end of results_path in case you don't have that otherwise no folder 
 #will be created and the study might crash.
-
 results_path <- "path to results folder" #where you want the results to be saved.
-
 #For example results_path <- "/Users/rvashisht/Desktop/StudyResults/" will save the
-study results in StudyResults folder in Desktop.
+#study results in StudyResults folder in Desktop.
 #----*********-------
 cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5
 numThread <- c(numericValue) #eg. 8 for 8 threads. Give as much as you can :) 
