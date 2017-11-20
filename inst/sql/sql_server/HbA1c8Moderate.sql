@@ -31,7 +31,7 @@ from
 where m.measurement_concept_id in (SELECT concept_id from  #Codesets where codeset_id = 0)
 ) C
 
-WHERE C.value_as_number <= 7.5000
+WHERE C.value_as_number <= 8.0000
 -- End Measurement Criteria
 
   ) P
