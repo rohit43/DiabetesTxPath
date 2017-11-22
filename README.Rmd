@@ -15,6 +15,7 @@ install_github("rohit43/DiabetesTxPath")
 ```
 
 ## Step-2
+Make sure you have installed all the latest versions of the following packages. The study might throw an error in case old packages are loaded. 
 Load the required libraries as follows:
 
 ```r
@@ -22,6 +23,7 @@ library("OhdsiRTools")
 library("OhdsiSharing")
 library("SqlRender")
 library("DatabaseConnector")
+library("FeatureExtraction")
 library("CohortMethod")
 library("DiabetesTxPath")
 ```
