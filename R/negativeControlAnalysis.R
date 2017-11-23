@@ -41,8 +41,8 @@ negativeControlAnalysis <- function(connectionDetails,
                                     cdmDatabaseSchema,
                                     resultsDatabaseSchema,
                                     outputFolder,
-                                    createExposureCohorts = FALSE,
-                                    createNegativeControlOutcomeCohorts = FALSE,
+                                    createExposureCohorts = TRUE,
+                                    createNegativeControlOutcomeCohorts = TRUE,
                                     mainResultsFolder,
                                     maxCores)
 {
