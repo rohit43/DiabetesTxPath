@@ -24,15 +24,18 @@
 #' @title
 #' getAgeGender
 #'
+#' @author
+#' Rohit Vashisht
+#'
 #' @details
 #' This function plots the results of T2D study.
 
 plotT2DStudyResults <- function(results_path){
-  print(paste("Plotting all the results. This might take few minutes ... ",sep=""))
+  print(paste("Plotting all the results. This might take few minutes ... "))
   resFiles <- list.files(paste(results_path,"/deleteMeBeforeSharing/",sep=""))
   #---------------------------------------------------------------------
   #For outCome 4 representing HbA1c <= 7%, represented as HbA1c7Good
-  x <- grep("_o4",resFiles)
+  x <- grep("_o4.rds",resFiles)
   resFilesOutCome4 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -88,7 +91,7 @@ plotT2DStudyResults <- function(results_path){
     remove(psScore,matchedPop,studyPop,balance,finalAttDiag,psScoreBeforeMatching,psScoreAfterMatching,covariateBalance,topCovariateBalance,kmPlotWithoutCI,kmPlotWithCI)
   }else
   {
-    print(paste("Looks like you don't have results for bigToSulf and bigToDpp4 comparision ..."))
+    print(paste("Looks like you don't have results for bigToSulf and bigToDpp4 comparision ...",sep=""))
   }
   #---- For tcTwo
   if(length(tcTwo)!=0){
@@ -191,7 +194,7 @@ plotT2DStudyResults <- function(results_path){
   #---------------------------------------------------------------------
   #---------------------------------------------------------------------
   #For outCome 5 representing HbA1c <= 8%, represented as HbA1c8Moderate
-  x <- grep("_o5",resFiles)
+  x <- grep("_o5.rds",resFiles)
   resFilesOutCome5 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -350,7 +353,7 @@ plotT2DStudyResults <- function(results_path){
   #---------------------------------------------------------------------
   #---------------------------------------------------------------------
   #For outCome 6 representing MI, represented as MI
-  x <- grep("_o6",resFiles)
+  x <- grep("_o6.rds",resFiles)
   resFilesOutCome6 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -509,7 +512,7 @@ plotT2DStudyResults <- function(results_path){
   #---------------------------------------------------------------------
   #---------------------------------------------------------------------
   #For outCome 7 representing KD, represented as KD
-  x <- grep("_o7",resFiles)
+  x <- grep("_o7.rds",resFiles)
   resFilesOutCome7 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -668,7 +671,7 @@ plotT2DStudyResults <- function(results_path){
   #---------------------------------------------------------------------
   #---------------------------------------------------------------------
   #For outCome 8 representing ED, represented as ED
-  x <- grep("_o8",resFiles)
+  x <- grep("_o8.rds",resFiles)
   resFilesOutCome8 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
