@@ -36,7 +36,7 @@
 #' @param cdmDatabaseSchema       The cdm database schema
 #' @param resultsDatabaseSchema   The results datavase schema
 #' @param cdmVersion              The cdm version, should be 5 only
-#'
+#' @param results_path            Result path
 #' @export
 runCompleteStudy <- function(connectionDetails = connectionDetails,
                              cdmDatabaseSchema = cdmDatabaseSchema,
