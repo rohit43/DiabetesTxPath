@@ -28,8 +28,8 @@
 #' Rohit Vashisht
 #'
 #' @details
-#' This function can be used to compute the age and gender of patients for each outcome and for each treatment and
-#' comparator cohort.
+#' This function plots the results of T2D study.
+
 plotT2DStudyResults <- function(results_path){
   print(paste("Plotting all the results. This might take few minutes ... "))
   resFiles <- list.files(paste(results_path,"/deleteMeBeforeSharing/",sep=""))
