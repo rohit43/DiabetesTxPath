@@ -46,159 +46,167 @@ runStudy <- function(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
                      resultsDatabaseSchema = resultsDatabaseSchema,
                      cdmVersion = cdmVersion,
-                     outComeId = outComeId,
-                     outComeName = outComeName,
-                     results_path = results_path) {
-  tcComb <- read.csv(system.file(paste("settings/", "treatmentComparator.csv", sep = ""),
-                                 package = "DiabetesTxPath"), stringsAsFactors = FALSE, header = TRUE)
+                     results_path = results_path,
+                     maxCores = maxCores) {
+  #Building Exposure and Outcome Cohorts
+  createExposureCohorts(connectionDetails = connectionDetails,
+                        cdmDatabaseSchema = cdmDatabaseSchema,
+                        resultsDatabaseSchema = resultsDatabaseSchema)
+  buildOutComeCohort(connectionDetails = connectionDetails,
+                     cdmDatabaseSchema = cdmDatabaseSchema,
+                     resultsDatabaseSchema = resultsDatabaseSchema)
+  #----- Need to work on this -----
+  #Computing the number of patients in each of the exposure cohort. The exposure
+  #cohorts with a minimum number of 250 patients will be considered for the analysis.
   conn <- DatabaseConnector::connect(connectionDetails)
-  drugComparision <- data.frame()
-  for (i in 1:nrow(tcComb)) {
-    buildCohort(connectionDetails = connectionDetails,
-                cdmDatabaseSchema = cdmDatabaseSchema,
-                resultsDatabaseSchema = resultsDatabaseSchema,
-                treatment = paste(tcComb$treatmentCohort[i], ".sql", sep = ""),
-                comparator = paste(tcComb$comparatorCohort[i], ".sql", sep = ""),
-                outComeId = outComeId)
-    # Computing total number of patients in treatment and comparator cohort. We will terminate here if
-    # both treatment and comparator cohorts have less than 250 patients.
-    sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 1",
-                 sep = "")
-    sql <- SqlRender::renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
-    sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-    numPidOne <- as.numeric(as.character((querySql(conn, sql))))
-    sql <- paste("SELECT COUNT (COHORT_DEFINITION_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway WHERE COHORT_DEFINITION_ID = 2",
-                 sep = "")
-    sql <- SqlRender::renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
-    sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-    numPidTwo <- as.numeric(as.character((querySql(conn, sql))))
-    if (numPidOne < 250 || numPidTwo < 250) {
-      treatment <- tcComb$treatmentCohort[i]
-      comparator <- tcComb$comparatorCohort[i]
-      drugRR_raw <- cbind(treatment, comparator, outComeName, NA, NA, NA, NA, NA, NA, NA)
-      colnames(drugRR_raw) <- c("Treatment",
-                                "Comparator",
-                                "outCome",
-                                "expRR",
-                                "expLowCI",
-                                "expUpCI",
-                                "logRR",
-                                "logLowCI",
-                                "logUpCI",
-                                "selogR")
-    } else {
-      treatment <- tcComb$treatmentCohort[i]
-      comparator <- tcComb$comparatorCohort[i]
-      results <- drugEfficacyAnalysis(connectionDetails = connectionDetails,
-                                      cdmDatabaseSchema = cdmDatabaseSchema,
-                                      resultsDatabaseSchema = resultsDatabaseSchema,
-                                      outCome = outComeId,
-                                      cdmVersion = cdmVersion,
-                                      treatment = treatment,
-                                      comparator = comparator)
-      if (length(results) < 1) {
-        drugRR_raw <- cbind(treatment, comparator, outComeName, NA, NA, NA, NA, NA, NA, NA)
-        colnames(drugRR_raw) <- c("Treatment",
-                                  "Comparator",
-                                  "outCome",
-                                  "expRR",
-                                  "expLowCI",
-                                  "expUpCI",
-                                  "logRR",
-                                  "logLowCI",
-                                  "logUpCI",
-                                  "selogR")
-      } else {
-        drugRR_raw <- cbind(treatment,
-                            comparator,
-                            outComeName,
-                            exp(coef(results[[6]])),
-                            exp(confint(results[[6]]))[1],
-                            exp(confint(results[[6]]))[2],
-                            results[[6]]$outcomeModelTreatmentEstimate$logRr,
-                            results[[6]]$outcomeModelTreatmentEstimate$logLb95,
-                            results[[6]]$outcomeModelTreatmentEstimate$logUb95,
-                            results[[6]]$outcomeModelTreatmentEstimate$seLogRr)
-        colnames(drugRR_raw) <- c("Treatment",
-                                  "Comparator",
-                                  "outCome",
-                                  "expRR",
-                                  "expLowCI",
-                                  "expUpCI",
-                                  "logRR",
-                                  "logLowCI",
-                                  "logUpCI",
-                                  "selogR")
-        pdf(file = paste(results_path,
-                         treatment,
-                         "-and-",
-                         comparator,
-                         "_",
-                         outComeName,
-                         ".pdf",
-                         sep = ""))
-        plot(results[[2]])  #Ps score before matching.
-        plot(results[[3]])  #Ps score after matching.
-        plot(results[[5]])  #Cov balance.
-        plot(results[[14]]) #Cov balance top-20
-        plot(results[[4]])  #Attr diagram.
-        plot(results[[7]])  #Km without CI
-        plot(results[[8]])  #Km with CI
-        plot.new()
-        grid.table(results[[1]])  #PsAUC
-        dev.off()
-        write.csv(results[[9]], file = paste(results_path,
-                                             "ageBeforeMatching-",
-                                             treatment,
-                                             "-and-",
-                                             comparator,
-                                             "_",
-                                             outComeName,
-                                             ".csv",
-                                             sep = ""))
-        write.csv(results[[10]], file = paste(results_path,
-                                              "ageAfterMatching-",
-                                              treatment,
-                                              "-and-",
-                                              comparator,
-                                              "_",
-                                              outComeName,
-                                              ".csv",
-                                              sep = ""))
-        write.csv(results[[11]], file = paste(results_path,
-                                              "genderBeforeMatching-",
-                                              treatment,
-                                              "-and-",
-                                              comparator,
-                                              "_",
-                                              outComeName,
-                                              ".csv",
-                                              sep = ""))
-        write.csv(results[[12]], file = paste(results_path,
-                                              "genderAfterMatching-",
-                                              treatment,
-                                              "-and-",
-                                              comparator,
-                                              "_",
-                                              outComeName,
-                                              ".csv",
-                                              sep = ""))
-        write.csv(results[[13]], file = paste(results_path,
-                                              "stat-",
-                                              treatment,
-                                              "-and-",
-                                              comparator,
-                                              "_",
-                                              outComeName,
-                                              ".csv",
-                                              sep = ""))
-      }
-    }
-    drugComparision <- rbind(drugComparision, drugRR_raw)
-    remove(drugRR_raw)
-  }
-  write.csv(drugComparision,
-            file = paste(results_path, "drugComparision", "_", outComeName, ".csv", sep = ""))
-  return(drugComparision)
-}
+  sql <- paste("SELECT cohort_definition_id as outComeId, COUNT(DISTINCT SUBJECT_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway GROUP BY COHORT_DEFINITION_ID",
+               sep = "")
+  sql <- SqlRender::renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
+  sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+  numPid <- (querySql(conn, sql))
+  #---------------------------------
 
+  #Performing the analysis -----
+  #Settings
+  covariateSettings <- FeatureExtraction::createCovariateSettings(
+    useDemographicsGender          = TRUE,
+    useDemographicsAge             = TRUE,
+    useDemographicsAgeGroup        = TRUE,
+    useConditionOccurrenceLongTerm = TRUE,
+    useDrugExposureLongTerm        = TRUE,
+    useProcedureOccurrenceLongTerm = TRUE,
+    excludedCovariateConceptIds    = c(1529331,1510202,1503297,43013884,40239216,40166035,1580747,19122137,44816332,45774435,
+                                       1583722,40170911,1502826,1516766,44785829,43526465,45774751,1597756,19059796,1560171,
+                                       1559684,1594973,1502809,1502855,1547504,1525215,253182,86009,51428,274783,139825,5856,
+                                       352385,314684,400008,314683),
+    addDescendantsToExclude        = TRUE
+  )
+  getDbCmDataArgs <- CohortMethod::createGetDbCohortMethodDataArgs(
+    studyStartDate             = "",
+    studyEndDate               = "",
+    excludeDrugsFromCovariates = FALSE,
+    firstExposureOnly          = TRUE,
+    removeDuplicateSubjects    = TRUE,
+    restrictToCommonPeriod     = FALSE,
+    washoutPeriod              = 0,
+    maxCohortSize              = 0,
+    covariateSettings          = covariateSettings
+  )
+  createStudyPopArgs <- CohortMethod::createCreateStudyPopulationArgs(
+    firstExposureOnly              = FALSE,
+    restrictToCommonPeriod         = FALSE,
+    washoutPeriod                  = 0,
+    removeDuplicateSubjects        = FALSE,
+    removeSubjectsWithPriorOutcome = TRUE,
+    priorOutcomeLookback           = 99999,
+    minDaysAtRisk                  = 0,
+    riskWindowStart                = 0,
+    addExposureDaysToStart         = FALSE,
+    riskWindowEnd                  = 0,
+    addExposureDaysToEnd           = TRUE
+  )
+  createPsArgs <- CohortMethod::createCreatePsArgs(
+    excludeCovariateIds = c(),
+    includeCovariateIds = c(),
+    maxCohortSizeForFitting = 250000,
+    errorOnHighCorrelation = TRUE,
+    stopOnError            = TRUE,
+    prior                  = Cyclops::createPrior(priorType          = "laplace",
+                                                  useCrossValidation = TRUE),
+    control                = Cyclops::createControl(cvType           = "auto",
+                                                    startingVariance = 0.01,
+                                                    tolerance        = 2e-07,
+                                                    cvRepetitions    = 10,
+                                                    noiseLevel       = "quiet")
+  )
+  matchOnPsArgs <- CohortMethod::createMatchOnPsArgs(
+    caliper      = 0.25,
+    caliperScale = "standardized logit",
+    maxRatio     = 1
+  )
+  fitOutcomeModelArgs <- CohortMethod::createFitOutcomeModelArgs(
+    modelType           = "cox",
+    stratified          = TRUE,
+    useCovariates       = FALSE,
+    excludeCovariateIds = c(),
+    includeCovariateIds = c(),
+    prior               = Cyclops::createPrior(priorType          = "laplace",
+                                               useCrossValidation = TRUE),
+    control             = Cyclops::createControl(cvType           = "auto",
+                                                 startingVariance = 0.01,
+                                                 tolerance        = 2e-07,
+                                                 cvRepetitions    = 10,
+                                                 noiseLevel       = "quiet")
+  )
+  cmAnalysis1 <- CohortMethod::createCmAnalysis(
+    analysisId                    = 2,
+    description                   = "T2D Tx Path Analysis",
+    targetType                    = NULL,
+    comparatorType                = NULL,
+    getDbCohortMethodDataArgs     = getDbCmDataArgs,
+    createStudyPopArgs            = createStudyPopArgs,
+    createPs                      = TRUE,
+    createPsArgs                  = createPsArgs,
+    trimByPs                      = FALSE,
+    trimByPsArgs                  = NULL,
+    trimByPsToEquipoise           = FALSE,
+    trimByPsToEquipoiseArgs       = NULL,
+    matchOnPs                     = TRUE,
+    matchOnPsArgs                 = matchOnPsArgs,
+    matchOnPsAndCovariates        = FALSE,
+    matchOnPsAndCovariatesArgs    = NULL,
+    stratifyByPs                  = FALSE,
+    stratifyByPsArgs              = NULL,
+    stratifyByPsAndCovariates     = FALSE,
+    stratifyByPsAndCovariatesArgs = NULL,
+    computeCovariateBalance       = TRUE,
+    fitOutcomeModel               = TRUE,
+    fitOutcomeModelArgs           = fitOutcomeModelArgs
+  )
+  cmAnalysisList <- list(cmAnalysis1)
+  #OutCome
+  allOutComeId <- c(4,5,6,7,8)
+  #comparision
+  cohortsToCreate <- cbind(c(1:3), read.csv(system.file("settings/CohortsToCreate.csv", package = "DiabetesTxPath"))[1:3, ])
+  comparisons <- base::t(utils::combn(x = cohortsToCreate[, 1], m = 2))
+  drugComparatorOutcomesList <- list()
+  for (i in 1:nrow(comparisons))
+  {
+    drugComparatorOutcomesList[[i]] <- CohortMethod::createDrugComparatorOutcomes(
+    targetId                    = comparisons[i, 1],
+    comparatorId                = comparisons[i, 2],
+    excludedCovariateConceptIds = c(),
+    includedCovariateConceptIds = c(),
+    outcomeIds                  = allOutComeId
+    )
+  }
+  #Performing the analysis ...
+  #All the intermediate results from the cohortMethod will be saved in the
+  #deleteMeBeforeSharing folder. Please make sure to delete this folder
+  #before sharing the results.
+  outputFolder <- paste(results_path,"deleteMeBeforeSharing/",sep="")
+  result <- CohortMethod::runCmAnalyses(
+    connectionDetails            = connectionDetails,
+    cdmDatabaseSchema            = cdmDatabaseSchema,
+    exposureDatabaseSchema       = resultsDatabaseSchema ,
+    exposureTable                = "ohdsi_t2dpathway",
+    outcomeDatabaseSchema        = resultsDatabaseSchema,
+    outcomeTable                 = "ohdsi_t2dpathway",
+    cdmVersion                   = 5,
+    outputFolder                 = outputFolder,
+    cmAnalysisList               = cmAnalysisList,
+    drugComparatorOutcomesList   = drugComparatorOutcomesList,
+    getDbCohortMethodDataThreads = 1,
+    createPsThreads              = 1,
+    psCvThreads                  = min(16, maxCores),
+    computeCovarBalThreads       = min(3, maxCores),
+    createStudyPopThreads        = min(3, maxCores),
+    trimMatchStratifyThreads     = min(10, maxCores),
+    fitOutcomeModelThreads       = max(1, round(maxCores/4)),
+    outcomeCvThreads             = min(4, maxCores),
+    refitPsForEveryOutcome       = FALSE,
+    outcomeIdsOfInterest         = NULL
+  )
+  analysisSummary <- CohortMethod::summarizeAnalyses(result)
+  write.csv(x = analysisSummary, file = file.path(results_path, "T2DStudyOutcome.csv"), row.names = FALSE)
+}
