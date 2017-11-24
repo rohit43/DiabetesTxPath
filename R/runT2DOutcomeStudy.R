@@ -134,7 +134,7 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
                                                  noiseLevel       = "quiet")
   )
   cmAnalysis1 <- CohortMethod::createCmAnalysis(
-    analysisId                    = 1,
+    analysisId                    = 2,
     description                   = "T2D Tx Path Analysis",
     targetType                    = NULL,
     comparatorType                = NULL,
