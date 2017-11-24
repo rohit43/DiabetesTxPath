@@ -55,11 +55,9 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
   print(paste("Plotting the study results ... ",sep=""))
   #Plot the study results ...
   plotT2DStudyResults(results_path)
-
   #get age and gender
   print(paste("Getting the age and gender information ... ",sep=""))
   getAgeGender(results_path = results_path)
-
   #run negative control analysis
   print(paste("Running the Negative Control Analysis ... ",sep = ""))
   negativeControlAnalysis(connectionDetails = connectionDetails,
