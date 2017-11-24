@@ -17,10 +17,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# @author Stanford University Center for Biomedical Informatics - Shah Lab
-# @author Rohit Vashisht
-#
+#'
 #' @title
 #' negativeControlAnalysis
 #'
@@ -40,16 +37,15 @@
 negativeControlAnalysis <- function(connectionDetails,
                                     cdmDatabaseSchema,
                                     resultsDatabaseSchema,
-                                    outputFolder,
-                                    createExposureCohorts = TRUE,
+                                    results_path,
+                                    createExposureCohorts = FALSE,
                                     createNegativeControlOutcomeCohorts = TRUE,
-                                    mainResultsFolder,
                                     maxCores)
 {
 
   if (createExposureCohorts)
   {
-    DiabetesTxPath::createExposureCohorts(
+      DiabetesTxPath::createExposureCohorts(
       connectionDetails     = connectionDetails,
       cdmDatabaseSchema     = cdmDatabaseSchema,
       resultsDatabaseSchema = resultsDatabaseSchema
@@ -58,16 +54,16 @@ negativeControlAnalysis <- function(connectionDetails,
 
   if (createNegativeControlOutcomeCohorts)
   {
-    DiabetesTxPath::createNegativeControlOutcomeCohorts(
+      DiabetesTxPath::createNegativeControlOutcomeCohorts(
       connectionDetails     = connectionDetails,
       cdmDatabaseSchema     = cdmDatabaseSchema,
       resultsDatabaseSchema = resultsDatabaseSchema
     )
   }
-
   covariateSettings <- FeatureExtraction::createCovariateSettings(
     useDemographicsGender          = TRUE,
     useDemographicsAge             = TRUE,
+    useDemographicsAgeGroup        = TRUE,
     useConditionOccurrenceLongTerm = TRUE,
     useDrugExposureLongTerm        = TRUE,
     useProcedureOccurrenceLongTerm = TRUE,
@@ -135,7 +131,7 @@ negativeControlAnalysis <- function(connectionDetails,
                                                  noiseLevel       = "quiet")
   )
   cmAnalysis1 <- CohortMethod::createCmAnalysis(
-    analysisId                    = 1,
+    analysisId                    = 2,
     description                   = "Negative control analyses for DiabetesTxPath",
     targetType                    = NULL,
     comparatorType                = NULL,
@@ -160,17 +156,12 @@ negativeControlAnalysis <- function(connectionDetails,
     fitOutcomeModelArgs           = fitOutcomeModelArgs
   )
   cmAnalysisList <- list(cmAnalysis1)
-
-
   negativeControls <- read.csv(system.file("settings", "negativeControls.csv", package = "DiabetesTxPath"))
   negativeControlConceptIds <- negativeControls$concept_id
-
   cohortsToCreate <- cbind(c(1:3), read.csv(system.file("settings/CohortsToCreate.csv", package = "DiabetesTxPath"))[1:3, ])
   comparisons <- base::t(utils::combn(x = cohortsToCreate[, 1], m = 2))
-
   drugComparatorOutcomesList <- list()
-  for (i in 1:nrow(comparisons))
-  {
+  for (i in 1:nrow(comparisons)){
     drugComparatorOutcomesList[[i]] <- CohortMethod::createDrugComparatorOutcomes(
       targetId                    = comparisons[i, 1],
       comparatorId                = comparisons[i, 2],
@@ -179,7 +170,7 @@ negativeControlAnalysis <- function(connectionDetails,
       outcomeIds                  = negativeControlConceptIds
     )
   }
-
+  outputFolder <- paste(results_path,"deleteMeBeforeSharing/",sep="")
   result <- CohortMethod::runCmAnalyses(
     connectionDetails            = connectionDetails,
     cdmDatabaseSchema            = cdmDatabaseSchema,
@@ -203,26 +194,9 @@ negativeControlAnalysis <- function(connectionDetails,
     outcomeIdsOfInterest         = NULL
   )
   analysisSummary <- CohortMethod::summarizeAnalyses(result)
-  write.csv(x = analysisSummary, file = file.path(outputFolder, "analysisSummary.csv"), row.names = FALSE)
-
-  mainSummary <- read.csv(file = file.path(mainResultsFolder, "resultBundel.csv"))[-1]  #NO P-VALUE!?
-  mainSummary$analysisId <- 1
-  mainSummary$targetId[mainSummary$Treatment == "bigToSulf"] <- 1
-  mainSummary$targetId[mainSummary$Treatment == "bigToDpp4"] <- 2
-  mainSummary$targetId[mainSummary$Treatment == "bigToThia"] <- 3      ### CAUTION!!! TARGETID COLLIDES WITH OUTCOMEID
-  mainSummary$comparatorId[mainSummary$Comparator == "bigToSulf"] <- 1
-  mainSummary$comparatorId[mainSummary$Comparator == "bigToDpp4"] <- 2
-  mainSummary$comparatorId[mainSummary$Comparator == "bigToThia"] <- 3 ### CAUTION!!! TARGETID COLLIDES WITH OUTCOMEID
-  mainSummary$outcomeId[mainSummary$outCome == "HbA1c7Good"] <- 4      ### CAUTION!!! OUTCOMEIDs DO NOT CORRESPOND WITH REST OF STUDY
-  mainSummary$outcomeId[mainSummary$outCome == "HbA1c8Moderate"] <- 5
-  mainSummary$outcomeId[mainSummary$outCome == "MI"] <- 6
-  mainSummary$outcomeId[mainSummary$outCome == "KD"] <- 7
-  mainSummary$outcomeId[mainSummary$outCome == "ED"] <- 8
-  names(mainSummary)[names(mainSummary)=="logRR"] <- "logRr"
-  names(mainSummary)[names(mainSummary)=="selogR"] <- "seLogRr"
-
-  fullSummary <- rbind(mainSummary[c(11:14, 7, 10)], analysisSummary[c(1:4, 15, 16)])
-
+  write.csv(x = analysisSummary, file = paste(results_path,"negativeControlResults.csv",sep=""), row.names = FALSE)
+  mainSummary <- read.csv(file = paste(results_path,"T2DStudyOutcome.csv",sep=""))
+  fullSummary <- rbind(mainSummary,analysisSummary)
   # Calibrate p-values:
   newSummary <- data.frame()
   for (drugComparatorOutcome in drugComparatorOutcomesList)
@@ -235,20 +209,16 @@ negativeControlAnalysis <- function(connectionDetails,
 
       negControlSubset <- subset[subset$outcomeId %in% negativeControlConceptIds, ]
       negControlSubset <- negControlSubset[!is.na(negControlSubset$logRr) & negControlSubset$logRr != 0, ]
-
       hoiSubset <- subset[!(subset$outcomeId %in% negativeControlConceptIds), ]
       hoiSubset <- hoiSubset[!is.na(hoiSubset$logRr) & hoiSubset$logRr != 0, ]
-
       if (nrow(negControlSubset) > 10) {
         null <- EmpiricalCalibration::fitMcmcNull(negControlSubset$logRr, negControlSubset$seLogRr)
-
         plotName <- paste("calEffect_a",analysisId, "_t", drugComparatorOutcome$targetId, "_c", drugComparatorOutcome$comparatorId, ".png", sep = "")
         EmpiricalCalibration::plotCalibrationEffect(negControlSubset$logRr,
                                                     negControlSubset$seLogRr,
                                                     hoiSubset$logRr,
                                                     hoiSubset$seLogRr,
-                                                    fileName = file.path(outputFolder, plotName))
-
+                                                    fileName = paste(results_path, plotName,sep=""))
         calibratedP <- EmpiricalCalibration::calibrateP(null, subset$logRr, subset$seLogRr)
         subset$calibratedP <- calibratedP$p
         subset$calibratedP_lb95ci <- calibratedP$lb95ci
@@ -269,5 +239,5 @@ negativeControlAnalysis <- function(connectionDetails,
   newSummary$rr <- exp(newSummary$logRr)
   newSummary$seRr <- exp(newSummary$seLogRr)
   write.csv(x    = newSummary[!newSummary$outcomeId %in% negativeControlConceptIds,],
-            file = file.path(outputFolder, "calibratedSummary.csv"), row.names = FALSE)
+            file = paste(results_path,"calibratedSummary.csv",sep=""), row.names = FALSE)
 }
