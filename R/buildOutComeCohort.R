@@ -41,9 +41,8 @@
 #'                                'cdm_data.dbo'.
 buildOutComeCohort <- function(connectionDetails,
                         cdmDatabaseSchema,
-                        resultsDatabaseSchema
-                        ) {
-  # Will build the cohorts depending on the outcome of interest
+                        resultsDatabaseSchema){
+  #Cohorts for the outCome of interest. Please note the outcome IDs for each outCome.
   outComeOne <- c("HbA1c7Good.sql")  #cohortId = 4
   outComeTwo <- c("HbA1c8Moderate.sql") #cohortId = 5
   outComeThree <- c("myocardialInfraction.sql")  #cohortId = 6
