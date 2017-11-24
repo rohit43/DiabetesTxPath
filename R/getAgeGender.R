@@ -3052,5 +3052,5 @@ getAgeGender <- function(results_path){
     print(paste("You don't seems to have results for bigToDpp4 versus bigToThia comparision ...",sep=""))
   }
   #----------------------------------------------------------------------
-  print(paste("Done computing age and gender ... ",sep="))
+  print(paste("Done computing age and gender ... ",sep=""))
 }
