@@ -24,14 +24,11 @@
 #' @title
 #' getAgeGender
 #'
-#' @author
-#' Rohit Vashisht
-#'
 #' @details
 #' This function can be used to compute the age and gender of patients for each outcome and for each treatment and
 #' comparator cohort.
 getAgeGender <- function(results_path){
-  print(paste("Plotting all the results. This might take few minutes ... "))
+  print(paste("Getting age and gender ... ",sep=""))
   resFiles <- list.files(paste(results_path,"/deleteMeBeforeSharing/",sep=""))
   #---------------------------------------------------------------------
   #For outCome 4 representing HbA1c <= 7%, represented as HbA1c7Good
