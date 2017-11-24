@@ -32,28 +32,21 @@
 #' @param connectionDetails       The connection details of the database.
 #' @param cdmDatabaseSchema       The cdm database schema
 #' @param resultsDatabaseSchema   The results datavase schema
-#'
-#' @export
 negativeControlAnalysis <- function(connectionDetails,
                                     cdmDatabaseSchema,
                                     resultsDatabaseSchema,
                                     results_path,
                                     createExposureCohorts = FALSE,
                                     createNegativeControlOutcomeCohorts = TRUE,
-                                    maxCores)
-{
-
-  if (createExposureCohorts)
-  {
+                                    maxCores){
+  if (createExposureCohorts){
       DiabetesTxPath::createExposureCohorts(
       connectionDetails     = connectionDetails,
       cdmDatabaseSchema     = cdmDatabaseSchema,
       resultsDatabaseSchema = resultsDatabaseSchema
     )
   }
-
-  if (createNegativeControlOutcomeCohorts)
-  {
+  if (createNegativeControlOutcomeCohorts){
       DiabetesTxPath::createNegativeControlOutcomeCohorts(
       connectionDetails     = connectionDetails,
       cdmDatabaseSchema     = cdmDatabaseSchema,
