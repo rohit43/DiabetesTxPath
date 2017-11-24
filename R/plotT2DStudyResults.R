@@ -828,5 +828,5 @@ plotT2DStudyResults <- function(results_path){
     print(paste("Looks like you don't have results for bigToDpp4 and bigToThia comparision ..."))
   }
   #---------------------------------------------------------------------
-  print(paste("Done ploting the results ... "))
+  print(paste("Done ploting the results ... ",sep=""))
 }
