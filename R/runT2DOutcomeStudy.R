@@ -50,17 +50,6 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
   buildOutComeCohort(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
                      resultsDatabaseSchema = resultsDatabaseSchema)
-  #----- Need to work on this -----
-  #Computing the number of patients in each of the exposure cohort. The exposure
-  #cohorts with a minimum number of 250 patients will be considered for the analysis.
-  conn <- DatabaseConnector::connect(connectionDetails)
-  sql <- paste("SELECT cohort_definition_id as outComeId, COUNT(DISTINCT SUBJECT_ID) AS PID FROM @results_database_schema.ohdsi_t2dpathway GROUP BY COHORT_DEFINITION_ID",
-               sep = "")
-  sql <- SqlRender::renderSql(sql, results_database_schema = resultsDatabaseSchema)$sql
-  sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
-  numPid <- (querySql(conn, sql))
-  #---------------------------------
-
   #Performing the analysis -----
   #Settings
   covariateSettings <- FeatureExtraction::createCovariateSettings(
