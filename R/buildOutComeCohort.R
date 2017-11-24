@@ -23,9 +23,6 @@
 #' @author
 #' Rohit Vashisht
 #'
-#
-#' Create the exposure and outcome cohorts
-#'
 #' @details
 #' This function creates all the required outcome cohorts for T2D study. The outcome cohort
 #' represents a) HbA1c <= 7%, b) HbA1c <= 8%, c) MI, d) KD and e) ED.
