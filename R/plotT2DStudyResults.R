@@ -24,14 +24,11 @@
 #' @title
 #' getAgeGender
 #'
-#' @author
-#' Rohit Vashisht
-#'
 #' @details
 #' This function plots the results of T2D study.
 
 plotT2DStudyResults <- function(results_path){
-  print(paste("Plotting all the results. This might take few minutes ... "))
+  print(paste("Plotting all the results. This might take few minutes ... ",sep=""))
   resFiles <- list.files(paste(results_path,"/deleteMeBeforeSharing/",sep=""))
   #---------------------------------------------------------------------
   #For outCome 4 representing HbA1c <= 7%, represented as HbA1c7Good
