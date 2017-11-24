@@ -44,6 +44,7 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
                              cdmVersion = cdmVersion,
                              results_path = results_path,
                              maxCores = maxCores) {
+  print(paste("Running the study for main outcomes",sep=""))
   #Run the study for T2D outcomes ...
   runT2DOutcomeStudy(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
@@ -51,9 +52,22 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
                      cdmVersion = cdmVersion,
                      results_path = results_path,
                      maxCores = maxCores)
+  print(paste("Plotting the study results ... ",sep=""))
   #Plot the study results ...
   plotT2DStudyResults(results_path)
 
   #get age and gender
+  print(paste("Getting the age and gender information ... ",sep=""))
   getAgeGender(results_path = results_path)
+
+  #run negative control analysis
+  print(paste("Running the Negative Control Analysis ... ",sep = ""))
+  negativeControlAnalysis(connectionDetails = connectionDetails,
+                          cdmDatabaseSchema = cdmDatabaseSchema,
+                          resultsDatabaseSchema = resultsDatabaseSchema,
+                          results_path = results_path,
+                          createExposureCohorts = FALSE,
+                          createNegativeControlOutcomeCohorts = TRUE,
+                          maxCores = maxCores)
+  print(paste("Study is finished - Thank You Very Much for Your Time ... ",sep=""))
 }
