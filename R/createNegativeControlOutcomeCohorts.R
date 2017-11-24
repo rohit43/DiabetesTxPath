@@ -34,16 +34,11 @@
 #' @param connectionDetails       The connection details of the database.
 #' @param cdmDatabaseSchema       The cdm database schema
 #' @param resultsDatabaseSchema   The results database schema
-#'
-#' @export
 createNegativeControlOutcomeCohorts <- function(connectionDetails,
                                                 cdmDatabaseSchema,
-                                                resultsDatabaseSchema)
-{
-
+                                                resultsDatabaseSchema){
   negativeControls <- read.csv(system.file("settings", "negativeControls.csv", package = "DiabetesTxPath"))
   negativeControlConceptIds <- base::noquote(paste(negativeControls$concept_id, collapse = ","))
-
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
   sql <- SqlRender::loadRenderTranslateSql(sqlFilename                  = "createNegativeControlOutcomeCohorts.sql",
                                            packageName                  = "DiabetesTxPath",
@@ -51,6 +46,5 @@ createNegativeControlOutcomeCohorts <- function(connectionDetails,
                                            results_database_schema      = resultsDatabaseSchema,
                                            cdm_database_schema          = cdmDatabaseSchema,
                                            negative_control_concept_ids = negativeControlConceptIds)
-  DatabaseConnector::executeSql(connection = connection,
-                                sql        = sql)
+  DatabaseConnector::executeSql(connection = connection,sql = sql)
 }
