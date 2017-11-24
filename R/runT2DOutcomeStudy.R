@@ -28,21 +28,16 @@
 #' Rohit Vashisht
 #'
 #' @details
-#' This function can be used to perform the DiabetesTxPathway analysis for a given outcome of
-#' interest. Briefly, for a given drug combinations, the function will construct a treatment, a
-#' comparator and an outcome cohort. Will use the CohortMethod and perform the analysis.
+#' This function can be used to execute the T2D study. The function create and stores the study outcome in the
+#' provided results folder.
 #'
 #' @param connectionDetails       The connection details of the database.
 #' @param cdmDatabaseSchema       The name of cdm database schema.
 #' @param resultsDatabaseSchema   The name of results database schema.
 #' @param cdmVersion              The name of cdm version, should be 5
-#' @param outComeId               The outcome Id for which study need to be executed (3 = HbA1c, 4 =
-#'                                MI, 5 = KD and 6 = ED)
-#' @param outComeName             Name of the outcome.
-#' @param numThread               Number of threads.
-#'
-#' @export
-runStudy <- function(connectionDetails = connectionDetails,
+#' @param results_path            The results path
+#' @param maxCores                Number of cores.
+runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
                      cdmDatabaseSchema = cdmDatabaseSchema,
                      resultsDatabaseSchema = resultsDatabaseSchema,
                      cdmVersion = cdmVersion,
