@@ -34,18 +34,12 @@
 #' @param connectionDetails       The connection details of the database.
 #' @param cdmDatabaseSchema       The cdm database schema
 #' @param resultsDatabaseSchema   The results database schema
-#'
-#' @export
-
 createExposureCohorts <- function(connectionDetails,
                                   cdmDatabaseSchema,
-                                  resultsDatabaseSchema)
-{
+                                  resultsDatabaseSchema){
   cohortsToCreate <- cbind(c(1:3), read.csv(system.file("settings/CohortsToCreate.csv", package = "DiabetesTxPath"))[1:3, ])
-
   targetDatabaseSchema <- resultsDatabaseSchema
   targetCohortTable <- "ohdsi_t2dpathway"
-
   connection <- DatabaseConnector::connect(connectionDetails)
   sql <- "IF OBJECT_ID('@results_database_schema.@target_cohort_table', 'U') IS NOT NULL\n  DROP TABLE @results_database_schema.@target_cohort_table;\n
        CREATE TABLE @results_database_schema.@target_cohort_table (cohort_definition_id INT, subject_id BIGINT, cohort_start_date DATE, cohort_end_date DATE);"
@@ -54,7 +48,6 @@ createExposureCohorts <- function(connectionDetails,
                               target_cohort_table     = targetCohortTable)$sql
   sql <- SqlRender::translateSql(sql, targetDialect   = connectionDetails$dbms)$sql
   DatabaseConnector::executeSql(connection = connection, sql = sql, progressBar = FALSE, reportOverallTime = FALSE)
-
   # bigToSulf
   sql <- SqlRender::loadRenderTranslateSql(sqlFilename            = paste0(cohortsToCreate[1, 4], ".sql"),
                                            packageName            = "DiabetesTxPath",
@@ -64,7 +57,6 @@ createExposureCohorts <- function(connectionDetails,
                                            target_cohort_table    = targetCohortTable,
                                            target_cohort_id       = 1)
   DatabaseConnector::executeSql(connection = connection, sql = sql)
-
   # bigToDpp4
   sql <- SqlRender::loadRenderTranslateSql(sqlFilename            = paste0(cohortsToCreate[2, 4], ".sql"),
                                            packageName            = "DiabetesTxPath",
@@ -74,7 +66,6 @@ createExposureCohorts <- function(connectionDetails,
                                            target_cohort_table    = targetCohortTable,
                                            target_cohort_id       = 2)
   DatabaseConnector::executeSql(connection = connection, sql = sql)
-
   # bigToThia
   sql <- SqlRender::loadRenderTranslateSql(sqlFilename            = paste0(cohortsToCreate[3, 4], ".sql"),
                                            packageName            = "DiabetesTxPath",
