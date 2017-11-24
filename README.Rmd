@@ -63,7 +63,8 @@ runCompleteStudy(connectionDetails = connectionDetails,
                  cdmDatabaseSchema = cdmDatabaseSchema,
                  resultsDatabaseSchema = resultsDatabaseSchema,
                  cdmVersion = cdmVersion,
-                 results_path = results_path)
+                 results_path = results_path,
+                 maxCores = maxCores)
 ```
 ## Important
 The runCompleteStudy function will create a folder *deleteMeBeforeSharing*.
