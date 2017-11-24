@@ -24,15 +24,18 @@
 #' @title
 #' getAgeGender
 #'
+#' @author
+#' Rohit Vashisht
+#'
 #' @details
 #' This function can be used to compute the age and gender of patients for each outcome and for each treatment and
 #' comparator cohort.
 getAgeGender <- function(results_path){
-  print(paste("Getting age and gender ... ",sep=""))
+  print(paste("Plotting all the results. This might take few minutes ... "))
   resFiles <- list.files(paste(results_path,"/deleteMeBeforeSharing/",sep=""))
   #---------------------------------------------------------------------
   #For outCome 4 representing HbA1c <= 7%, represented as HbA1c7Good
-  x <- grep("_o4",resFiles)
+  x <- grep("_o4.rds",resFiles)
   resFilesOutCome4 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -636,7 +639,7 @@ getAgeGender <- function(results_path){
   #---------------------------------------------------------------------
   #For outCome 5 representing HbA1c <= 8%, represented as HbA1c8Moderate
   remove(x)
-  x <- grep("_o5",resFiles)
+  x <- grep("_o5.rds",resFiles)
   resFilesOutCome5 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -1240,7 +1243,7 @@ getAgeGender <- function(results_path){
   #---------------------------------------------------------------------
   #For outCome 6 representing MI, represented as MI
   remove(x)
-  x <- grep("_o6",resFiles)
+  x <- grep("_o6.rds",resFiles)
   resFilesOutCome6 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -1844,7 +1847,7 @@ getAgeGender <- function(results_path){
   #----------------------------------------------------------------------
   #For outCome 7 representing KD, represented as KD
   remove(x)
-  x <- grep("_o7",resFiles)
+  x <- grep("_o7.rds",resFiles)
   resFilesOutCome7 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
@@ -2448,7 +2451,7 @@ getAgeGender <- function(results_path){
   #----------------------------------------------------------------------
   #For outCome 8 representing ED, represented as ED
   remove(x)
-  x <- grep("_o8",resFiles)
+  x <- grep("_o8.rds",resFiles)
   resFilesOutCome8 <- resFiles[x]
   #Get files sorted for t and c comparisions
   #bigToSulf and bigToDpp4 (1,2)
