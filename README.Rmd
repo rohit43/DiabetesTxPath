@@ -53,6 +53,7 @@ results_path <- "path to results folder" #where you want the results to be saved
 #study results in StudyResults folder in Desktop.
 #----*********-------
 cdmVersion <- "5" #do not change this. Please note, this study can only be executed on CDMV5 
+maxCores <- 40 #change this depending on your compute power.
 ```
 
 ## Step-5
