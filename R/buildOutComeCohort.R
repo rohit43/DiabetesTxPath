@@ -27,7 +27,8 @@
 #' Create the exposure and outcome cohorts
 #'
 #' @details
-#' This function will create treatment, comparator and outcomes cohort as included in this package.
+#' This function creates all the required outcome cohorts for T2D study. The outcome cohort
+#' represents a) HbA1c <= 7%, b) HbA1c <= 8%, c) MI, d) KD and e) ED.
 #'
 #' @param connectionDetails       An object of type \code{connectionDetails} as created using the
 #'                                \code{\link[DatabaseConnector]{createConnectionDetails}} function in
