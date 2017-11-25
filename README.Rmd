@@ -25,6 +25,7 @@ library("SqlRender")
 library("DatabaseConnector")
 library("FeatureExtraction")
 library("CohortMethod")
+library("EmpiricalCalibration")
 library("DiabetesTxPath")
 ```
 ## Step-3
