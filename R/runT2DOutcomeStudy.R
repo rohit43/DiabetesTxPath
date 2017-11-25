@@ -151,6 +151,8 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
   #OutCome
   allOutComeId <- c(4,5,6,7,8)
   #comparision
+  negativeControls <- read.csv(system.file("settings", "negativeControls.csv", package = "DiabetesTxPath"))
+  negativeControlConceptIds <- negativeControls$concept_id
   cohortsToCreate <- cbind(c(1:3), read.csv(system.file("settings/CohortsToCreate.csv", package = "DiabetesTxPath"))[1:3, ])
   comparisons <- base::t(utils::combn(x = cohortsToCreate[, 1], m = 2))
   drugComparatorOutcomesList <- list()
@@ -161,7 +163,7 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
     comparatorId                = comparisons[i, 2],
     excludedCovariateConceptIds = c(),
     includedCovariateConceptIds = c(),
-    outcomeIds                  = allOutComeId
+    outcomeIds                  = c(allOutComeId, negativeControlConceptIds)
     )
   }
   #Performing the analysis ...
@@ -175,7 +177,7 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
     exposureDatabaseSchema       = resultsDatabaseSchema ,
     exposureTable                = "ohdsi_t2dpathway",
     outcomeDatabaseSchema        = resultsDatabaseSchema,
-    outcomeTable                 = "ohdsi_t2dpathway",
+    outcomeTable                 = "ohdsi_t2dpathway_outcomes",
     cdmVersion                   = 5,
     outputFolder                 = outputFolder,
     cmAnalysisList               = cmAnalysisList,
@@ -193,4 +195,47 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
   )
   analysisSummary <- CohortMethod::summarizeAnalyses(result)
   write.csv(x = analysisSummary, file = file.path(results_path, "T2DStudyOutcome.csv"), row.names = FALSE)
+  # Calibrate p-values:
+  newSummary <- data.frame()
+  for (drugComparatorOutcome in drugComparatorOutcomesList)
+  {
+    for (analysisId in unique(analysisSummary$analysisId))
+    {
+      subset <- analysisSummary[analysisSummary$analysisId == analysisId &
+                              analysisSummary$targetId == drugComparatorOutcome$targetId &
+                              analysisSummary$comparatorId == drugComparatorOutcome$comparatorId, ]
+
+      negControlSubset <- subset[subset$outcomeId %in% negativeControlConceptIds, ]
+      negControlSubset <- negControlSubset[!is.na(negControlSubset$logRr) & negControlSubset$logRr != 0, ]
+      hoiSubset <- subset[!(subset$outcomeId %in% negativeControlConceptIds), ]
+      hoiSubset <- hoiSubset[!is.na(hoiSubset$logRr) & hoiSubset$logRr != 0, ]
+      if (nrow(negControlSubset) > 10) {
+        null <- EmpiricalCalibration::fitMcmcNull(negControlSubset$logRr, negControlSubset$seLogRr)
+        plotName <- paste("calEffect_a",analysisId, "_t", drugComparatorOutcome$targetId, "_c", drugComparatorOutcome$comparatorId, ".png", sep = "")
+        EmpiricalCalibration::plotCalibrationEffect(negControlSubset$logRr,
+                                                    negControlSubset$seLogRr,
+                                                    hoiSubset$logRr,
+                                                    hoiSubset$seLogRr,
+                                                    fileName = paste(results_path, plotName,sep=""))
+        calibratedP <- EmpiricalCalibration::calibrateP(null, subset$logRr, subset$seLogRr)
+        subset$calibratedP <- calibratedP$p
+        subset$calibratedP_lb95ci <- calibratedP$lb95ci
+        subset$calibratedP_ub95ci <- calibratedP$ub95ci
+        mcmc <- attr(null, "mcmc")
+        subset$null_mean <- mean(mcmc$chain[, 1])
+        subset$null_sd <- 1/sqrt(mean(mcmc$chain[, 2]))
+      } else {
+        subset$calibratedP <- NA
+        subset$calibratedP_lb95ci <- NA
+        subset$calibratedP_ub95ci <- NA
+        subset$null_mean <- NA
+        subset$null_sd <- NA
+      }
+      newSummary <- rbind(newSummary, subset)
+    }
+  }
+  newSummary$rr <- exp(newSummary$logRr)
+  newSummary$seRr <- exp(newSummary$seLogRr)
+  write.csv(x    = newSummary[!newSummary$outcomeId %in% negativeControlConceptIds,],
+            file = paste(results_path,"calibratedSummary.csv",sep=""), row.names = FALSE)
 }
