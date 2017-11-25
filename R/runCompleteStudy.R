@@ -36,7 +36,7 @@
 #' @param cdmDatabaseSchema       The cdm database schema
 #' @param resultsDatabaseSchema   The results datavase schema
 #' @param cdmVersion              The cdm version, should be 5 only
-#' @param results_path            Result path
+#'
 #' @export
 runCompleteStudy <- function(connectionDetails = connectionDetails,
                              cdmDatabaseSchema = cdmDatabaseSchema,
@@ -58,14 +58,5 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
   #get age and gender
   print(paste("Getting the age and gender information ... ",sep=""))
   getAgeGender(results_path = results_path)
-  #run negative control analysis
-  print(paste("Running the Negative Control Analysis ... ",sep = ""))
-  negativeControlAnalysis(connectionDetails = connectionDetails,
-                          cdmDatabaseSchema = cdmDatabaseSchema,
-                          resultsDatabaseSchema = resultsDatabaseSchema,
-                          results_path = results_path,
-                          createExposureCohorts = FALSE,
-                          createNegativeControlOutcomeCohorts = TRUE,
-                          maxCores = maxCores)
   print(paste("Study is finished - Thank You Very Much for Your Time ... ",sep=""))
 }
