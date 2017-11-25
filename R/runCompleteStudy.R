@@ -58,5 +58,8 @@ runCompleteStudy <- function(connectionDetails = connectionDetails,
   #get age and gender
   print(paste("Getting the age and gender information ... ",sep=""))
   getAgeGender(results_path = results_path)
+  #get HbA1c States for all the comparisions
+  print(paste("Getting HbA1c Stats",sep=""))
+  getHbA1cStat(results_path = results_path)
   print(paste("Study is finished - Thank You Very Much for Your Time ... ",sep=""))
 }
