@@ -23,6 +23,9 @@
 #' @author
 #' Rohit Vashisht
 #'
+#
+#' Create the exposure and outcome cohorts
+#'
 #' @details
 #' This function creates all the required outcome cohorts for T2D study. The outcome cohort
 #' represents a) HbA1c <= 7%, b) HbA1c <= 8%, c) MI, d) KD and e) ED.
@@ -47,8 +50,18 @@ buildOutComeCohort <- function(connectionDetails,
   outComeFour <- c("kidneyDisorder.sql")  #cohortId = 7
   outComeFive <- c("eyeDisorder.sql")  #cohortId = 8
   targetDatabaseSchema <- resultsDatabaseSchema
-  targetCohortTable <- "ohdsi_t2dpathway"
+  targetCohortTable <- "ohdsi_t2dpathway_outcomes"
   conn <- DatabaseConnector::connect(connectionDetails)
+  sql <- "IF OBJECT_ID('@results_database_schema.@target_cohort_table', 'U') IS NOT NULL\n  DROP TABLE @results_database_schema.@target_cohort_table;\n
+       CREATE TABLE @results_database_schema.@target_cohort_table (cohort_definition_id INT, subject_id BIGINT, cohort_start_date DATE, cohort_end_date DATE);"
+  sql <- SqlRender::renderSql(sql                     = sql,
+                              results_database_schema = resultsDatabaseSchema,
+                              target_cohort_table     = targetCohortTable)$sql
+  sql <- SqlRender::translateSql(sql, targetDialect   = connectionDetails$dbms)$sql
+  DatabaseConnector::executeSql(connection = conn, sql = sql, progressBar = FALSE, reportOverallTime = FALSE)
+
+
+
   #outComeOne - outComeId = 4, outComeName <- HbA1c7Good
   sql <- readSql(system.file(paste("sql/sql_server/", outComeOne, sep = ""),
                                package = "DiabetesTxPath"))
@@ -97,6 +110,17 @@ buildOutComeCohort <- function(connectionDetails,
                                 target_database_schema = targetDatabaseSchema,
                                 target_cohort_table = targetCohortTable,
                                 target_cohort_id = 8)$sql
+  sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
+  DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
+  #Negative Controls
+  negativeControls <- read.csv(system.file("settings", "negativeControls.csv", package = "DiabetesTxPath"))
+  negativeControlConceptIds <- base::noquote(paste(negativeControls$concept_id, collapse = ","))
+  sql <- readSql(system.file(paste("sql/sql_server/createNegativeControlOutcomeCohorts.sql", sep = ""),
+                             package = "DiabetesTxPath"))
+  sql <- SqlRender::renderSql(sql,
+                              cdm_database_schema = cdmDatabaseSchema,
+                              results_database_schema = resultsDatabaseSchema,
+                              negative_control_concept_ids = negativeControlConceptIds)$sql
   sql <- SqlRender::translateSql(sql, targetDialect = connectionDetails$dbms)$sql
   DatabaseConnector::executeSql(conn, sql, progressBar = FALSE, reportOverallTime = FALSE)
 }
