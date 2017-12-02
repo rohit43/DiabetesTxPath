@@ -194,7 +194,7 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
     outcomeIdsOfInterest         = NULL
   )
   analysisSummary <- CohortMethod::summarizeAnalyses(result)
-  write.csv(x = analysisSummary, file = file.path(results_path, "T2DStudyOutcome.csv"), row.names = FALSE)
+  #write.csv(x = analysisSummary, file = file.path(results_path, "T2DStudyOutcome.csv"), row.names = FALSE)
   # Calibrate p-values:
   newSummary <- data.frame()
   for (drugComparatorOutcome in drugComparatorOutcomesList)
@@ -241,5 +241,10 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
   newSummary$targetId <- ifelse(newSummary$targetId==2,"BigToDpp4",newSummary$targetId)
   newSummary$comparatorId <- ifelse(newSummary$comparatorId==2,"BigToDpp4",newSummary$comparatorId)
   newSummary$comparatorId <- ifelse(newSummary$comparatorId==3,"BigToThia",newSummary$comparatorId)
+  newSummary$outcomeId <- ifelse(newSummary$outcomeId==4,"HbA1c7Good",newSummary$outcomeId)
+  newSummary$outcomeId <- ifelse(newSummary$outcomeId==5,"HbA1c8Moderate",newSummary$outcomeId)
+  newSummary$outcomeId <- ifelse(newSummary$outcomeId==6,"MyocardialInfarction",newSummary$outcomeId)
+  newSummary$outcomeId <- ifelse(newSummary$outcomeId==7,"KidneyDisorder",newSummary$outcomeId)
+  newSummary$outcomeId <- ifelse(newSummary$outcomeId==8,"EyeDisorder",newSummary$outcomeId)
   write.csv(newSummary,file = paste(results_path,"calibratedSummary.csv",sep=""), row.names = FALSE)
 }
