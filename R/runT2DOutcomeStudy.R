@@ -236,6 +236,10 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
   }
   newSummary$rr <- exp(newSummary$logRr)
   newSummary$seRr <- exp(newSummary$seLogRr)
-  write.csv(x    = newSummary[!newSummary$outcomeId %in% negativeControlConceptIds,],
-            file = paste(results_path,"calibratedSummary.csv",sep=""), row.names = FALSE)
+  newSummary <- newSummary[!newSummary$outcomeId %in% negativeControlConceptIds,]
+  newSummary$targetId <- ifelse(newSummary$targetId==1,"BigToSulf",newSummary$targetId)
+  newSummary$targetId <- ifelse(newSummary$targetId==2,"BigToDpp4",newSummary$targetId)
+  newSummary$comparatorId <- ifelse(newSummary$comparatorId==2,"BigToDpp4",newSummary$comparatorId)
+  newSummary$comparatorId <- ifelse(newSummary$comparatorId==3,"BigToThia",newSummary$comparatorId)
+  write.csv(newSummary,file = paste(results_path,"calibratedSummary.csv",sep=""), row.names = FALSE)
 }
