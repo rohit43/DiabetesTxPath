@@ -209,13 +209,25 @@ runT2DOutcomeStudy <- function(connectionDetails = connectionDetails,
       negControlSubset <- negControlSubset[!is.na(negControlSubset$logRr) & negControlSubset$logRr != 0, ]
       hoiSubset <- subset[!(subset$outcomeId %in% negativeControlConceptIds), ]
       hoiSubset <- hoiSubset[!is.na(hoiSubset$logRr) & hoiSubset$logRr != 0, ]
-      if (nrow(negControlSubset) > 10) {
+       if (nrow(negControlSubset) > 10) {
         null <- EmpiricalCalibration::fitMcmcNull(negControlSubset$logRr, negControlSubset$seLogRr)
-        plotName <- paste("calEffect_a",analysisId, "_t", drugComparatorOutcome$targetId, "_c", drugComparatorOutcome$comparatorId, ".png", sep = "")
+        if(drugComparatorOutcome$targetId==1){
+          treatmentName <- c("BigToSulf")
+        }else if(drugComparatorOutcome$targetId==2){
+          treatmentName <- c("BigToDpp4")
+        }
+        if(drugComparatorOutcome$comparatorId==2){
+          comparatorName <- c("BigToDpp4")
+        }else if(drugComparatorOutcome$comparatorId==3){
+          comparatorName <- c("BigToThia")
+        }
+        #plotName <- paste("calEffect_a",analysisId, "_t", drugComparatorOutcome$targetId, "_c", drugComparatorOutcome$comparatorId, ".png", sep = "")
+        plotName <- paste("calEffect_",analysisId, "_t", treatmentName, "_c", comparatorName, ".png", sep = "")
         EmpiricalCalibration::plotCalibrationEffect(negControlSubset$logRr,
                                                     negControlSubset$seLogRr,
                                                     hoiSubset$logRr,
                                                     hoiSubset$seLogRr,
+                                                    title = paste(treatmentName,comparatorName,sep="--"),
                                                     fileName = paste(results_path, plotName,sep=""))
         calibratedP <- EmpiricalCalibration::calibrateP(null, subset$logRr, subset$seLogRr)
         subset$calibratedP <- calibratedP$p
