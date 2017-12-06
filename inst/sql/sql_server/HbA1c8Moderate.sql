@@ -7,7 +7,7 @@ CREATE TABLE #Codesets (
 INSERT INTO #Codesets (codeset_id, concept_id)
 SELECT 0 as codeset_id, c.concept_id FROM (select distinct I.concept_id FROM
 ( 
-  select concept_id from @cdm_database_schema.CONCEPT where concept_id in (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971)and invalid_reason is null
+  select concept_id from @cdm_database_schema.CONCEPT where concept_id in (3004410,3007263,3003309,3005673,40762352,40758583,3034639,4197971,40758583)and invalid_reason is null
 
 ) I
 ) C;
