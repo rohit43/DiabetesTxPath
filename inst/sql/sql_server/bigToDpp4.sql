@@ -289,7 +289,7 @@ GROUP BY i.event_id, i.person_id
 ;
 
 
-with collapse_constructor_input (person_id, start_date, end_date) as
+with collapse_input (person_id, start_date, end_date) as
 (
 	select F.person_id, F.start_date, F.end_date
 	FROM (
@@ -300,8 +300,8 @@ with collapse_constructor_input (person_id, start_date, end_date) as
 	WHERE F.ordinal = 1
 )
 select person_id, start_date, end_date
-into #collapse_constructor_input
-from collapse_constructor_input
+into #collapse_input
+from collapse_input
 ;
 
 -- era constructor
@@ -312,7 +312,7 @@ WITH cteSource (person_id, start_date, end_date, groupid) AS
 		, start_date
 		, end_date
 		, dense_rank() over(order by person_id) as groupid
-	FROM #collapse_constructor_input as so
+	FROM #collapse_input as so
 )
 ,
 --------------------------------------------------------------------------------------------------------------
@@ -366,7 +366,7 @@ cteEnds (groupid, start_date, end_date) AS
 		, c.start_date
 )
 select person_id, start_date, end_date
-into #collapse_constructor_output
+into #collapse_output
 from
 (
 	select distinct person_id , min(b.start_date) as start_date, b.end_date
@@ -383,16 +383,16 @@ from
 DELETE FROM @target_database_schema.@target_cohort_table where cohort_definition_id = @target_cohort_id;
 INSERT INTO @target_database_schema.@target_cohort_table (cohort_definition_id, subject_id, cohort_start_date, cohort_end_date)
 select @target_cohort_id as cohort_definition_id, person_id, start_date, end_date
-FROM #collapse_constructor_output CO --@output: change depending on what is selected for collapse construction
+FROM #collapse_output CO --@output: change depending on what is selected for collapse construction
 ;
 
 
 
-TRUNCATE TABLE #collapse_constructor_input;
-DROP TABLE #collapse_constructor_input;
+TRUNCATE TABLE #collapse_input;
+DROP TABLE #collapse_input;
 
-TRUNCATE TABLE #collapse_constructor_output;
-DROP TABLE #collapse_constructor_output;
+TRUNCATE TABLE #collapse_output;
+DROP TABLE #collapse_output;
 
 TRUNCATE TABLE #cohort_ends;
 DROP TABLE #cohort_ends;
