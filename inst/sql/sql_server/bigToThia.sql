@@ -282,93 +282,93 @@ GROUP BY i.event_id, i.person_id
 ;
 
 
-with collapse_constructor_input (person_id, start_date, end_date) as
+with collapse_input (person_id, start_date, end_date) as
 (
-	select F.person_id, F.start_date, F.end_date
-	FROM (
-	  select I.event_id, I.person_id, I.start_date, E.end_date, row_number() over (partition by I.person_id, I.event_id order by E.end_date) as ordinal 
-	  from #included_events I
-	  join #cohort_ends E on I.event_id = E.event_id and I.person_id = E.person_id and E.end_date >= I.start_date
-	) F
-	WHERE F.ordinal = 1
+  select F.person_id, F.start_date, F.end_date
+  FROM (
+    select I.event_id, I.person_id, I.start_date, E.end_date, row_number() over (partition by I.person_id, I.event_id order by E.end_date) as ordinal 
+    from #included_events I
+    join #cohort_ends E on I.event_id = E.event_id and I.person_id = E.person_id and E.end_date >= I.start_date
+  ) F
+  WHERE F.ordinal = 1
 )
 select person_id, start_date, end_date
-into #collapse_constructor_input
-from collapse_constructor_input
+into #collapse_input
+from collapse_input
 ;
 
 -- era constructor
 WITH cteSource (person_id, start_date, end_date, groupid) AS
 (
-	SELECT
-		person_id  
-		, start_date
-		, end_date
-		, dense_rank() over(order by person_id) as groupid
-	FROM #collapse_constructor_input as so
+  SELECT
+    person_id  
+    , start_date
+    , end_date
+    , dense_rank() over(order by person_id) as groupid
+  FROM #collapse_input as so
 )
 ,
 --------------------------------------------------------------------------------------------------------------
 cteEndDates (groupid, end_date) AS -- the magic
-(	
-	SELECT
-		groupid
-		, DATEADD(day,-1 * 0, event_date)  as end_date
-	FROM
-	(
-		SELECT
-			groupid
-			, event_date
-			, event_type
-			, MAX(start_ordinal) OVER (PARTITION BY groupid ORDER BY event_date, event_type ROWS UNBOUNDED PRECEDING) AS start_ordinal 
-			, ROW_NUMBER() OVER (PARTITION BY groupid ORDER BY event_date, event_type) AS overall_ord
-		FROM
-		(
+( 
+  SELECT
+    groupid
+    , DATEADD(day,-1 * 0, event_date)  as end_date
+  FROM
+  (
+    SELECT
+      groupid
+      , event_date
+      , event_type
+      , MAX(start_ordinal) OVER (PARTITION BY groupid ORDER BY event_date, event_type ROWS UNBOUNDED PRECEDING) AS start_ordinal 
+      , ROW_NUMBER() OVER (PARTITION BY groupid ORDER BY event_date, event_type) AS overall_ord
+    FROM
+    (
 
-			SELECT
-				groupid
-				, start_date AS event_date
-				, -1 AS event_type
-				, ROW_NUMBER() OVER (PARTITION BY groupid ORDER BY start_date) AS start_ordinal
-			FROM cteSource
-		
-			UNION ALL
-		
+      SELECT
+        groupid
+        , start_date AS event_date
+        , -1 AS event_type
+        , ROW_NUMBER() OVER (PARTITION BY groupid ORDER BY start_date) AS start_ordinal
+      FROM cteSource
+    
+      UNION ALL
+    
 
-			SELECT
-				groupid
-				, DATEADD(day,0,end_date) as end_date
-				, 1 AS event_type
-				, NULL
-			FROM cteSource
-		) RAWDATA
-	) e
-	WHERE (2 * e.start_ordinal) - e.overall_ord = 0
+      SELECT
+        groupid
+        , DATEADD(day,0,end_date) as end_date
+        , 1 AS event_type
+        , NULL
+      FROM cteSource
+    ) RAWDATA
+  ) e
+  WHERE (2 * e.start_ordinal) - e.overall_ord = 0
 ),
 --------------------------------------------------------------------------------------------------------------
 cteEnds (groupid, start_date, end_date) AS
 (
-	SELECT
-		 c.groupid
-		, c.start_date
-		, MIN(e.end_date) AS era_end_date
-	FROM cteSource c
-	JOIN cteEndDates e ON c.groupid = e.groupid AND e.end_date >= c.start_date
-	GROUP BY
-		 c.groupid
-		, c.start_date
+  SELECT
+     c.groupid
+    , c.start_date
+    , MIN(e.end_date) AS era_end_date
+  FROM cteSource c
+  JOIN cteEndDates e ON c.groupid = e.groupid AND e.end_date >= c.start_date
+  GROUP BY
+     c.groupid
+    , c.start_date
 )
 select person_id, start_date, end_date
-into #collapse_constructor_output
+into #collapse_output
 from
 (
-	select distinct person_id , min(b.start_date) as start_date, b.end_date
-	from
-		(select distinct person_id, groupid from cteSource) as a
-	inner join
-		cteEnds as b
-	on a.groupid = b.groupid
-	group by person_id, end_date
+  select distinct person_id , min(b.start_date) as start_date, b.end_date
+  from
+    (select distinct person_id, groupid from cteSource) as a
+  inner join
+    cteEnds as b
+  on a.groupid = b.groupid
+  group by person_id, end_date
 ) q
 ;
 
@@ -376,16 +376,16 @@ from
 DELETE FROM @target_database_schema.@target_cohort_table where cohort_definition_id = @target_cohort_id;
 INSERT INTO @target_database_schema.@target_cohort_table (cohort_definition_id, subject_id, cohort_start_date, cohort_end_date)
 select @target_cohort_id as cohort_definition_id, person_id, start_date, end_date
-FROM #collapse_constructor_output CO --@output: change depending on what is selected for collapse construction
+FROM #collapse_output CO --@output: change depending on what is selected for collapse construction
 ;
 
 
 
-TRUNCATE TABLE #collapse_constructor_input;
-DROP TABLE #collapse_constructor_input;
+TRUNCATE TABLE #collapse_input;
+DROP TABLE #collapse_input;
 
-TRUNCATE TABLE #collapse_constructor_output;
-DROP TABLE #collapse_constructor_output;
+TRUNCATE TABLE #collapse_output;
+DROP TABLE #collapse_output;
 
 TRUNCATE TABLE #cohort_ends;
 DROP TABLE #cohort_ends;
