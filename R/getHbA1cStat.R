@@ -83,6 +83,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -106,6 +107,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -151,6 +153,7 @@ getHbA1cStat <- function(results_path){
                     AND m.measurement_date >= dateadd(day,
                     -365,
                     CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -174,6 +177,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -237,6 +241,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -260,6 +265,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -305,6 +311,7 @@ getHbA1cStat <- function(results_path){
                     AND m.measurement_date >= dateadd(day,
                     -365,
                     CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -328,6 +335,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -391,6 +399,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -414,6 +423,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -459,6 +469,7 @@ getHbA1cStat <- function(results_path){
                     AND m.measurement_date >= dateadd(day,
                     -365,
                     CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -482,6 +493,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -557,6 +569,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -580,6 +593,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -625,6 +639,7 @@ getHbA1cStat <- function(results_path){
                     AND m.measurement_date >= dateadd(day,
                     -365,
                     CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -648,6 +663,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -711,6 +727,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -734,6 +751,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -779,6 +797,7 @@ getHbA1cStat <- function(results_path){
                     AND m.measurement_date >= dateadd(day,
                     -365,
                     CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -802,6 +821,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -865,6 +885,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE < CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -888,6 +909,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -933,6 +955,7 @@ getHbA1cStat <- function(results_path){
                     AND m.measurement_date >= dateadd(day,
                     -365,
                     CAST(o.COHORTSTARTDATE AS DATE)) AND m.measurement_date <= CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
@@ -956,6 +979,7 @@ getHbA1cStat <- function(results_path){
                     3034639,
                     4197971)
                     AND m.MEASUREMENT_DATE > CAST(o.COHORTSTARTDATE AS DATE)
+                    AND m.VALUE_AS_NUMBER < 20
                     GROUP BY o.treatment", sep = "")
     sqlOne <- SqlRender::renderSql(sqlOne, cdmDatabaseSchema = cdmDatabaseSchema)$sql
     sqlOne <- SqlRender::translateSql(sqlOne, targetDialect = connectionDetails$dbms)$sql
